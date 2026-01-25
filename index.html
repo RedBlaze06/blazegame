@@ -1,1 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rocket Dodge</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+        }
+
+        #game {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Fusée */
+        .rocket {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 80px;
+            background: #d32f2f;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .rocket::before {
+            content: "";
+            position: absolute;
+            top: -25px;
+            left: 0;
+            width: 40px;
+            height: 25px;
+            background: #b71c1c;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+
+        .rocket::after {
+            content: "";
+            position: absolute;
+            bottom: -20px;
+            left: -15px;
+            width: 30px;
+            height: 20px;
+            background: #ff9800;
+            clip-path: polygon(0% 100%, 100% 100%, 100% 0%);
+        }
+
+        .wing-right {
+            position: absolute;
+            bottom: -20px;
+            right: -15px;
+            width: 30px;
+            height: 20px;
+            background: #ff9800;
+            clip-path: polygon(0% 100%, 100% 100%, 0% 0%);
+        }
+
+        /* Rochers */
+        .rock {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: gray;
+            border-radius: 10px;
+        }
+
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+        }
+
+        #message {
+            position: absolute;
+            top: 40%;
+            width: 100%;
+            font-size: 40px;
+            display: none;
+        }
+
+        /* Boutons téléphone */
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .btn {
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 40px;
+            line-height: 120px;
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game">
+    <div id="score">Score : 0</div>
+    <div id="message"></div>
+
+    <div class="rocket" id="rocket"></div>
+    <div class="wing-right"></div>
+
+    <div id="controls">
+        <div class="btn" id="left">←</div>
+        <div class="btn" id="right">→</div>
+    </div>
+</div>
+
+<script>
+let rocket = document.getElementById("rocket");
+let scoreDisplay = document.getElementById("score");
+let message = document.getElementById("message");
+
+let rocketX = window.innerWidth / 2;
+let speed = 4;
+let score = 0;
+let gameOver = false;
+
+function updateSpeed() {
+    if (score >= 1500) speed = 20;
+    else if (score >= 1000) speed = 14;
+    else if (score >= 500) speed = 10;
+    else if (score >= 250) speed = 7;
+    else if (score >= 100) speed = 5;
+}
+
+function moveRocket() {
+    rocket.style.left = rocketX + "px";
+}
+
+document.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") rocketX -= 30;
+    if (e.key === "ArrowRight") rocketX += 30;
+});
+
+document.getElementById("left").onclick = () => rocketX -= 30;
+document.getElementById("right").onclick = () => rocketX += 30;
+
+function spawnRock() {
+    if (gameOver) return;
+
+    let rock = document.createElement("div");
+    rock.classList.add("rock");
+    rock.style.left = Math.random() * (window.innerWidth - 60) + "px";
+    rock.style.top = "-60px";
+
+    document.getElementById("game").appendChild(rock);
+
+    let fall = setInterval(() => {
+        if (gameOver) {
+            clearInterval(fall);
+            rock.remove();
+            return;
+        }
+
+        let top = parseInt(rock.style.top);
+        rock.style.top = top + speed + "px";
+
+        let r = rock.getBoundingClientRect();
+        let f = rocket.getBoundingClientRect();
+
+        if (
+            r.left < f.right &&
+            r.right > f.left &&
+            r.top < f.bottom &&
+            r.bottom > f.top
+        ) {
+            gameOver = true;
+            message.innerHTML = "💥 GAME OVER 💥<br>Score : " + score;
+            message.style.display = "block";
+        }
+
+        if (top > window.innerHeight) {
+            rock.remove();
+            clearInterval(fall);
+        }
+    }, 20);
+
+    setTimeout(spawnRock, 800 - Math.min(score, 700));
+}
+
+function updateScore() {
+    if (gameOver) return;
+
+    score++;
+    scoreDisplay.innerHTML = "Score : " + score;
+
+    updateSpeed();
+
+    if (score >= 2000) {
+        gameOver = true;
+        message.innerHTML = "🏆 VICTOIRE ! 🏆<br>Score : " + score;
+        message.style.display = "block";
+    }
+
+    setTimeout(updateScore, 500);
+}
+
+moveRocket();
+spawnRock();
+updateScore();
+
+setInterval(moveRocket, 20);
+</script>
+
+</body>
+</html>
 
