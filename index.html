@@ -19,6 +19,16 @@
             overflow: hidden;
         }
 
+        /* Fond spatial animé */
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            opacity: 0.8;
+            border-radius: 50%;
+        }
+
         /* Fusée */
         .rocket {
             position: absolute;
@@ -42,6 +52,7 @@
             clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
         }
 
+        /* Aile gauche */
         .rocket::after {
             content: "";
             position: absolute;
@@ -53,6 +64,7 @@
             clip-path: polygon(0% 100%, 100% 100%, 100% 0%);
         }
 
+        /* Aile droite */
         .wing-right {
             position: absolute;
             bottom: -20px;
@@ -63,13 +75,14 @@
             clip-path: polygon(0% 100%, 100% 100%, 0% 0%);
         }
 
-        /* Rochers */
+        /* Astéroïdes */
         .rock {
             position: absolute;
-            width: 60px;
-            height: 60px;
-            background: gray;
-            border-radius: 10px;
+            width: 50px;
+            height: 50px;
+            background: #777;
+            border-radius: 50%;
+            box-shadow: inset -5px -5px 10px #555;
         }
 
         #score {
@@ -113,8 +126,9 @@
     <div id="score">Score : 0</div>
     <div id="message"></div>
 
-    <div class="rocket" id="rocket"></div>
-    <div class="wing-right"></div>
+    <div class="rocket" id="rocket">
+        <div class="wing-right"></div>
+    </div>
 
     <div id="controls">
         <div class="btn" id="left">←</div>
@@ -132,6 +146,31 @@ let speed = 4;
 let score = 0;
 let gameOver = false;
 
+/* Limites de la map */
+function clampRocket() {
+    if (rocketX < 20) rocketX = 20;
+    if (rocketX > window.innerWidth - 60) rocketX = window.innerWidth - 60;
+}
+
+/* Fond étoilé */
+function spawnStars() {
+    for (let i = 0; i < 80; i++) {
+        let s = document.createElement("div");
+        s.classList.add("star");
+        s.style.left = Math.random() * window.innerWidth + "px";
+        s.style.top = Math.random() * window.innerHeight + "px";
+        document.getElementById("game").appendChild(s);
+
+        setInterval(() => {
+            let top = parseInt(s.style.top);
+            s.style.top = (top + 3) % window.innerHeight + "px";
+        }, 50);
+    }
+}
+
+spawnStars();
+
+/* Vitesse selon score */
 function updateSpeed() {
     if (score >= 1500) speed = 20;
     else if (score >= 1000) speed = 14;
@@ -140,7 +179,9 @@ function updateSpeed() {
     else if (score >= 100) speed = 5;
 }
 
+/* Déplacement fusée */
 function moveRocket() {
+    clampRocket();
     rocket.style.left = rocketX + "px";
 }
 
@@ -152,6 +193,7 @@ document.addEventListener("keydown", e => {
 document.getElementById("left").onclick = () => rocketX -= 30;
 document.getElementById("right").onclick = () => rocketX += 30;
 
+/* Astéroïdes */
 function spawnRock() {
     if (gameOver) return;
 
@@ -195,6 +237,7 @@ function spawnRock() {
     setTimeout(spawnRock, 800 - Math.min(score, 700));
 }
 
+/* Score */
 function updateScore() {
     if (gameOver) return;
 
