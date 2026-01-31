@@ -2,41 +2,234 @@
 <html>
 <head>
     <title>Fusée Infinity</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
-        body{margin:0;overflow:hidden;background:black;font-family:Arial,sans-serif;color:white;text-align:center;}
-        .screen{position:absolute;inset:0;display:none;}
-        .screen.active{display:block;}
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            color: white;
+            text-align: center;
+            background: black;
+        }
+
+        /* Écrans */
+        .screen {
+            position: absolute;
+            inset: 0;
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
 
         /* Accueil */
-        #home-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:#0b0b0b;}
-        #title{font-size:48px;letter-spacing:4px;text-shadow:0 0 10px #fff;margin-bottom:20px;}
-        #pseudo-input{padding:10px 15px;font-size:18px;border-radius:8px;border:none;outline:none;width:220px;text-align:center;}
-        .menu-button{padding:12px 25px;font-size:20px;border-radius:10px;border:none;cursor:pointer;background:#2196f3;color:white;box-shadow:0 0 10px rgba(33,150,243,0.7);}
-        .menu-button:active{transform:scale(0.97);}
-        #best-score-display{position:absolute;bottom:20px;left:20px;font-size:18px;text-align:left;}
+        #home-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            background-image: url("rocket-bg.jpg");
+            background-size: cover;
+            background-position: center;
+        }
+
+        #title {
+            font-size: 48px;
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px #fff;
+        }
+
+        #pseudo-input {
+            padding: 10px 15px;
+            font-size: 18px;
+            border-radius: 8px;
+            border: none;
+            width: 220px;
+            text-align: center;
+            outline: none;
+        }
+
+        .menu-button {
+            padding: 12px 25px;
+            font-size: 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            background: #2196f3;
+            color: white;
+            box-shadow: 0 0 10px rgba(33,150,243,0.7);
+        }
+
+        .menu-button:active {
+            transform: scale(0.97);
+        }
+
+        #best-score-display {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 18px;
+            text-align: left;
+        }
 
         /* Classement */
-        #leaderboard-screen{display:flex;flex-direction:column;align-items:center;padding-top:60px;background:linear-gradient(45deg,#222,#444);}
-        #leaderboard-title{font-size:36px;margin-bottom:20px;color:#ffd700;letter-spacing:2px;}
-        #leaderboard-list{width:90%;max-width:400px;text-align:left;}
-        .leaderboard-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin-bottom:6px;border-radius:8px;color:white;background:rgba(255,255,255,0.1);}
-        .empty-slot{background:rgba(255,255,255,0.02);color:#888;font-style:italic;}
+        #leaderboard-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 40px;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        }
+
+        #leaderboard-screen h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: gold;
+        }
+
+        #leaderboard-list {
+            width: 90%;
+            max-width: 400px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            font-size: 18px;
+        }
+
+        .medal {
+            margin-right: 8px;
+        }
+
+        #back-home-leaderboard {
+            margin-top: 20px;
+        }
 
         /* Jeu */
-        #game-screen{position:relative;background:black;overflow:hidden;}
-        .star{position:absolute;width:2px;height:2px;background:white;opacity:0.8;border-radius:50%;pointer-events:none;z-index:0;}
-        .rocket{position:absolute;bottom:50px;left:50%;transform:translateX(-50%);width:40px;height:80px;z-index:2;}
-        .rocket-body{width:40px;height:80px;background:linear-gradient(to top,#d32f2f,#ff5252);border-radius:10px 10px 0 0;position:relative;}
-        .rocket-nose{position:absolute;top:-25px;left:0;width:40px;height:25px;background:#b71c1c;clip-path:polygon(50% 0%,0% 100%,100% 100%);}
-        .rocket-flame{position:absolute;bottom:-20px;left:5px;width:30px;height:20px;background:#ff9800;clip-path:polygon(50% 0%,0% 100%,100% 100%);}
-        .wing-right{position:absolute;bottom:10px;right:-15px;width:20px;height:40px;background:#ff9800;clip-path:polygon(0% 100%,100% 50%,0% 0%);}
-        .rock{position:absolute;width:50px;height:50px;background:#777;border-radius:50%;box-shadow:inset -5px -5px 10px #555;z-index:1;}
-        #score{position:absolute;top:10px;left:10px;font-size:24px;z-index:3;color:#ffd700;}
-        #message{position:absolute;top:35%;width:100%;font-size:32px;display:none;z-index:3;color:#ff4444;}
-        #game-over-btn{padding:12px 20px;font-size:20px;border:none;border-radius:10px;background:#2196f3;color:white;cursor:pointer;margin-top:20px;display:none;}
-        #controls{position:absolute;bottom:20px;width:100%;display:flex;justify-content:space-around;z-index:3;}
-        .btn{width:120px;height:120px;background:rgba(255,255,255,0.2);border-radius:20px;font-size:40px;line-height:120px;user-select:none;}
+        #game-screen {
+            position: relative;
+            overflow: hidden;
+            background: black;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            opacity: 0.8;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .rocket {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 80px;
+            background: linear-gradient(to top, #ff3d00, #d50000);
+            border-radius: 10px 10px 0 0;
+            z-index: 2;
+        }
+
+        .rocket::before {
+            content: "";
+            position: absolute;
+            top: -25px;
+            left: 0;
+            width: 40px;
+            height: 25px;
+            background: #b71c1c;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        }
+
+        /* Flammes */
+        .flame {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 40px;
+            background: linear-gradient(to bottom, yellow, orange, red);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            animation: flame 0.1s infinite;
+            z-index: 1;
+        }
+
+        @keyframes flame {
+            0% { transform: translateX(-50%) scaleY(1); opacity: 1; }
+            50% { transform: translateX(-50%) scaleY(1.3); opacity: 0.8; }
+            100% { transform: translateX(-50%) scaleY(1); opacity: 1; }
+        }
+
+        .rock {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: #777;
+            border-radius: 50%;
+            box-shadow: inset -5px -5px 10px #555;
+            z-index: 1;
+        }
+
+        #score {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            font-size: 24px;
+            z-index: 3;
+        }
+
+        #message {
+            position: absolute;
+            top: 40%;
+            width: 100%;
+            font-size: 32px;
+            display: none;
+            z-index: 3;
+        }
+
+        #game-over-return {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 22px;
+        }
+
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            z-index: 3;
+        }
+
+        .btn {
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 40px;
+            line-height: 120px;
+            user-select: none;
+        }
+
     </style>
 </head>
 <body>
@@ -52,46 +245,43 @@
 
 <!-- Classement -->
 <div id="leaderboard-screen" class="screen">
-    <div id="leaderboard-title">CLASSEMENT</div>
+    <h2>Classement</h2>
     <div id="leaderboard-list"></div>
-    <button id="back-home" class="menu-button">Retour</button>
+    <button id="back-home-leaderboard" class="menu-button">Retour</button>
 </div>
 
 <!-- Jeu -->
 <div id="game-screen" class="screen">
     <div id="score">Score : 0</div>
     <div id="message"></div>
-    <button id="game-over-btn">Retour</button>
-
     <div class="rocket" id="rocket">
-        <div class="rocket-body">
-            <div class="rocket-nose"></div>
-            <div class="rocket-flame"></div>
-            <div class="wing-right"></div>
-        </div>
+        <div class="flame"></div>
     </div>
-
     <div id="controls">
         <div class="btn" id="left">←</div>
         <div class="btn" id="right">→</div>
     </div>
 </div>
 
-<!-- Firebase -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "TA_API_KEY_ICI",
-  authDomain: "fusee-infinity.firebaseapp.com",
-  databaseURL: "https://fusee-infinity-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "fusee-infinity",
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-</script>
 
 <script>
+/* ---------- FIREBASE ---------- */
+const firebaseConfig = {
+    apiKey: "TON_API_KEY",
+    authDomain: "TON_PROJECT.firebaseapp.com",
+    databaseURL: "https://fusee-infinity-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "fusee-infinity",
+    storageBucket: "TON_PROJECT.appspot.com",
+    messagingSenderId: "TON_ID",
+    appId: "TON_APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
 /* ---------- Sélecteurs ---------- */
 const homeScreen = document.getElementById("home-screen");
 const gameScreen = document.getElementById("game-screen");
@@ -101,42 +291,59 @@ const pseudoInput = document.getElementById("pseudo-input");
 const playButton = document.getElementById("play-button");
 const leaderboardButton = document.getElementById("leaderboard-button");
 const bestScoreDisplay = document.getElementById("best-score-display");
-const backHome = document.getElementById("back-home");
+const backHomeLeaderboard = document.getElementById("back-home-leaderboard");
 const leaderboardList = document.getElementById("leaderboard-list");
 
 let rocket = document.getElementById("rocket");
 let scoreDisplay = document.getElementById("score");
 let message = document.getElementById("message");
-let gameOverBtn = document.getElementById("game-over-btn");
 
 let rocketX = window.innerWidth / 2;
 let score = 0;
 let gameOver = false;
-let scoreInterval = null;
 let moveInterval = null;
+let scoreInterval = null;
 let currentPlayer = "";
 
-/* ---------- Fond étoilé ---------- */
-function spawnStarsInGame() {
-    document.querySelectorAll("#game-screen .star").forEach(s=>s.remove());
-    for(let i=0;i<120;i++){
-        let s=document.createElement("div");
-        s.classList.add("star");
-        s.style.left=Math.random()*window.innerWidth+"px";
-        s.style.top=Math.random()*window.innerHeight+"px";
+/* ---------- Fond étoiles ---------- */
+function spawnStars() {
+    document.querySelectorAll("#game-screen .star").forEach(s => s.remove());
+    for (let i = 0; i < 120; i++) {
+        const s = document.createElement("div");
+        s.className = "star";
+        s.style.left = Math.random()*window.innerWidth+"px";
+        s.style.top = Math.random()*window.innerHeight+"px";
         gameScreen.appendChild(s);
-        setInterval(()=>{
-            if(!gameScreen.classList.contains("active"))return;
-            let top=parseInt(s.style.top);
-            s.style.top=(top+2)%window.innerHeight+"px";
-        },60);
+        let speed = Math.random()*2 + 0.5;
+        setInterval(() => {
+            if(!gameScreen.classList.contains("active")) return;
+            let top = parseFloat(s.style.top);
+            s.style.top = (top+speed)%window.innerHeight + "px";
+        }, 30);
     }
 }
 
-/* ---------- LocalStorage ---------- */
-function getBestScore() { return parseInt(localStorage.getItem("bestScore")||"0",10); }
-function setBestScore(value) { localStorage.setItem("bestScore",value.toString()); }
-function updateBestScoreDisplay() { bestScoreDisplay.textContent="Meilleur score : "+getBestScore(); }
+/* ---------- Classement Firebase ---------- */
+function updateLeaderboard() {
+    db.ref("leaderboard").once("value").then(snapshot=>{
+        let data = snapshot.val() || {};
+        let arr = Object.values(data);
+        arr.sort((a,b)=>b.score-a.score);
+        leaderboardList.innerHTML = "";
+        for(let i=0;i<10;i++){
+            const div = document.createElement("div");
+            div.className="leaderboard-item";
+            if(arr[i]){
+                let medal="";
+                if(i==0) medal="🥇"; else if(i==1) medal="🥈"; else if(i==2) medal="🥉"; else medal=(i+1)+".";
+                div.textContent= `${medal} ${arr[i].name} - ${arr[i].score}`;
+            } else {
+                div.textContent= `${i+1}. ---`;
+            }
+            leaderboardList.appendChild(div);
+        }
+    });
+}
 
 /* ---------- Navigation ---------- */
 function showScreen(screen){
@@ -144,144 +351,127 @@ function showScreen(screen){
     screen.classList.add("active");
 }
 
-/* ---------- Classement Firebase ---------- */
-function saveScoreOnline(name,score){
-    const ref=db.ref("leaderboard");
-    ref.push({name,score,time:Date.now()});
+/* ---------- Rocket Movement ---------- */
+function clampRocket(){
+    if(rocketX<20) rocketX=20;
+    if(rocketX>window.innerWidth-60) rocketX=window.innerWidth-60;
 }
-
-async function renderLeaderboard(){
-    const ref=db.ref("leaderboard");
-    const snapshot=await ref.orderByChild("score").limitToLast(10).once("value");
-    leaderboardList.innerHTML="";
-    let data=[];
-    snapshot.forEach(s=>data.push(s.val()));
-    data.sort((a,b)=>b.score-a.score);
-    for(let i=0;i<10;i++){
-        let entry=data[i]||{name:"---",score:0};
-        let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":i+1+".";
-        let div=document.createElement("div");
-        div.className="leaderboard-item";
-        if(entry.name==="---") div.classList.add("empty-slot");
-        div.innerHTML=`<span>${medal} ${entry.name}</span><span>${entry.score}</span>`;
-        leaderboardList.appendChild(div);
-    }
-}
-
-/* ---------- Fusée ---------- */
-function clampRocket(){ if(rocketX<20)rocketX=20;if(rocketX>window.innerWidth-60)rocketX=window.innerWidth-60; }
 function moveRocket(){ clampRocket(); rocket.style.left=rocketX+"px"; }
 
-/* ---------- Astéroïdes ---------- */
-let baseSpeed=4, speedMultiplier=1, spawnBase=800, spawnMultiplier=1, pointInterval=400, pointMultiplier=1;
-let activatedThresholds=new Set();
-let speed=baseSpeed, currentSpawnDelay=spawnBase, currentPointDelay=pointInterval;
+/* ---------- Jeu ---------- */
+let rocks = [];
+let speed = 4;
+let spawnDelay = 800;
+let pointDelay = 400;
 
-function updateDifficulty(){
-    let thresholds=[100,250,500,1000,1500];
-    thresholds.forEach(t=>{
-        if(score>=t&&!activatedThresholds.has(t)){
-            activatedThresholds.add(t);
-            speedMultiplier*=2; spawnMultiplier*=2; pointMultiplier*=2;
-            speed=baseSpeed*speedMultiplier;
-            currentSpawnDelay=Math.max(50,spawnBase/spawnMultiplier);
-            currentPointDelay=Math.max(20,pointInterval/pointMultiplier);
-            restartScoreLoop();
+function startGame(){
+    gameOver=false;
+    score=0;
+    rocketX = window.innerWidth/2;
+    moveRocket();
+    rocks.forEach(r=>r.remove());
+    rocks=[];
+    spawnStars();
+    scoreDisplay.textContent="Score: "+score;
+
+    clearInterval(moveInterval);
+    moveInterval=setInterval(moveRocket,20);
+    clearInterval(scoreInterval);
+    scoreInterval=setInterval(()=>{
+        if(!gameOver && gameScreen.classList.contains("active")){
+            score++;
+            scoreDisplay.textContent="Score: "+score;
         }
-    });
+    }, pointDelay);
+
+    spawnRock();
 }
 
 function spawnRock(){
-    if(gameOver)return;
-    let rock=document.createElement("div");
-    rock.classList.add("rock");
-    rock.style.left=Math.random()*(window.innerWidth-60)+"px";
+    if(gameOver) return;
+    const rock = document.createElement("div");
+    rock.className="rock";
+    rock.style.left = Math.random()*(window.innerWidth-60)+"px";
     rock.style.top="-60px";
     gameScreen.appendChild(rock);
-    let fall=setInterval(()=>{
-        if(gameOver||!gameScreen.classList.contains("active")){ clearInterval(fall); rock.remove(); return;}
-        let top=parseInt(rock.style.top);
-        rock.style.top=top+speed+"px";
-        let r=rock.getBoundingClientRect();
-        let f=rocket.getBoundingClientRect();
-        if(r.left<f.right&&r.right>f.left&&r.top<f.bottom&&r.bottom>f.top){
-            gameOver=true; endGame(); clearInterval(fall); rock.remove(); return;
+    rocks.push(rock);
+
+    let fall = setInterval(()=>{
+        if(gameOver || !gameScreen.classList.contains("active")){
+            clearInterval(fall);
+            rock.remove();
+            return;
         }
-        if(top>window.innerHeight){ rock.remove(); clearInterval(fall);}
+        let top = parseFloat(rock.style.top);
+        rock.style.top=(top+speed)+"px";
+
+        const r=rock.getBoundingClientRect();
+        const f=rocket.getBoundingClientRect();
+        if(r.left<f.right && r.right>f.left && r.top<f.bottom && r.bottom>f.top){
+            gameOver=true;
+            clearInterval(fall);
+            endGame();
+            return;
+        }
+
+        if(top>window.innerHeight){
+            clearInterval(fall);
+            rock.remove();
+        }
     },20);
-    setTimeout(spawnRock,currentSpawnDelay);
+
+    setTimeout(spawnRock, spawnDelay);
 }
 
-/* ---------- Score ---------- */
-function restartScoreLoop(){
-    clearInterval(scoreInterval);
-    scoreInterval=setInterval(()=>{
-        if(!gameOver&&gameScreen.classList.contains("active")){
-            score++;
-            scoreDisplay.textContent="Score : "+score;
-            updateDifficulty();
-        }
-    },currentPointDelay);
-}
-
-/* ---------- Fin de partie ---------- */
+/* ---------- Fin de jeu ---------- */
 function endGame(){
-    message.innerHTML="💥 GAME OVER 💥<br>Score : "+score;
+    message.innerHTML=`💥 GAME OVER 💥<br>Score: ${score}<br>`;
+    const btn=document.createElement("button");
+    btn.id="game-over-return";
+    btn.className="menu-button";
+    btn.textContent="Retour";
+    btn.onclick=()=>showScreen(homeScreen);
+    message.appendChild(btn);
     message.style.display="block";
-    gameOverBtn.style.display="block";
 
-    const best=getBestScore();
-    if(score>best)setBestScore(score);
-
-    saveScoreOnline(currentPlayer,score);
-    updateBestScoreDisplay();
-}
-
-/* ---------- Lancement du jeu ---------- */
-function startGame(){
-    gameOver=false; score=0;
-    speed=baseSpeed; speedMultiplier=1; spawnMultiplier=1; pointMultiplier=1;
-    currentSpawnDelay=spawnBase; currentPointDelay=pointInterval; activatedThresholds.clear();
-
-    message.style.display="none"; gameOverBtn.style.display="none";
-    scoreDisplay.textContent="Score : "+score;
-
-    rocketX=window.innerWidth/2; moveRocket();
-
-    document.querySelectorAll("#game-screen .rock").forEach(r=>r.remove());
-    document.querySelectorAll("#game-screen .star").forEach(s=>s.remove());
-
-    spawnStarsInGame();
-    clearInterval(moveInterval); moveInterval=setInterval(moveRocket,20);
-
-    restartScoreLoop();
-    spawnRock();
+    // Enregistrement Firebase
+    db.ref("leaderboard").push({name: currentPlayer, score: score});
 }
 
 /* ---------- Contrôles ---------- */
 document.addEventListener("keydown",e=>{
-    if(!gameScreen.classList.contains("active"))return;
-    if(e.key==="ArrowLeft")rocketX-=30;
-    if(e.key==="ArrowRight")rocketX+=30;
+    if(!gameScreen.classList.contains("active")) return;
+    if(e.key==="ArrowLeft") rocketX-=30;
+    if(e.key==="ArrowRight") rocketX+=30;
 });
-document.getElementById("left").onclick=()=>rocketX-=30;
-document.getElementById("right").onclick=()=>rocketX+=30;
+document.getElementById("left").onclick = ()=> rocketX-=30;
+document.getElementById("right").onclick = ()=> rocketX+=30;
 
 /* ---------- Boutons menu ---------- */
-playButton.addEventListener("click",()=>{
+playButton.onclick=()=>{
     currentPlayer=pseudoInput.value.trim()||"Anonyme";
     showScreen(gameScreen);
     startGame();
-});
-leaderboardButton.addEventListener("click",async()=>{
-    await renderLeaderboard();
+};
+leaderboardButton.onclick=()=>{
+    updateLeaderboard();
     showScreen(leaderboardScreen);
-});
-backHome.addEventListener("click",()=>showScreen(homeScreen));
-gameOverBtn.addEventListener("click",()=>showScreen(homeScreen));
+};
+backHomeLeaderboard.onclick=()=> showScreen(homeScreen);
 
-/* ---------- Init ---------- */
-updateBestScoreDisplay();
+/* ---------- Best score ---------- */
+function updateBestScore(){
+    db.ref("leaderboard").once("value").then(snapshot=>{
+        let data = Object.values(snapshot.val()||{});
+        let maxScore=0;
+        data.forEach(d=>{ if(d.score>maxScore) maxScore=d.score; });
+        bestScoreDisplay.textContent="Meilleur score: "+maxScore;
+    });
+}
+setInterval(updateBestScore,2000);
+updateBestScore();
+
 </script>
+
 </body>
 </html>
