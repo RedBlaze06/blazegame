@@ -145,6 +145,25 @@ button{background:#2196f3;color:white;cursor:pointer}
     </div>
 </div>
 
+<!-- ==== FIREBASE ==== -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "TON_API_KEY",
+  authDomain: "TON_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://fusee-infinity-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "TON_PROJECT_ID",
+  storageBucket: "TON_PROJECT_ID.appspot.com",
+  messagingSenderId: "TON_SENDER_ID",
+  appId: "TON_APP_ID"
+};
+
+const app = firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+</script>
+
 <script>
 const home=document.getElementById("home-screen")
 const game=document.getElementById("game-screen")
@@ -211,12 +230,9 @@ function loopScore(){
     clearInterval(scoreInterval);
     scoreInterval = setInterval(()=>{
         if(gameOver) return;
-
-        // Score + multiplicateur
         score += pointMultiplier;
         scoreTxt.textContent = "Score : " + score;
 
-        // Seuils
         let thresholds = [100, 250, 500, 1000];
         if(score >= 1500){
             let extra = Math.floor((score - 1500) / 500);
@@ -233,27 +249,48 @@ function loopScore(){
             }
         });
 
-    }, 250); // toutes les 0.25 sec
+    }, 250);
 }
 
-/* CLASSEMENT */
+/* ===== FIREBASE - CLASSEMENT ===== */
+function sendScoreToFirebase(player, score) {
+    const scoresRef = database.ref('scores');
+    scoresRef.push({
+      name: player,
+      score: score,
+      date: Date.now()
+    });
+}
+
+function getTop10FromFirebase(callback) {
+    const scoresRef = database.ref('scores');
+    scoresRef.orderByChild('score').limitToLast(10).once('value', (snapshot) => {
+        const scores = [];
+        snapshot.forEach((child) => {
+            scores.push(child.val());
+        });
+        scores.sort((a,b)=>b.score-a.score);
+        callback(scores);
+    });
+}
+
 function showLeaderboard(){
     list.innerHTML=""
-    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
-
-    for(let i=0;i<10;i++){
-        let d=document.createElement("div")
-        if(data[i]){
-            let cls=i==0?"gold":i==1?"silver":i==2?"bronze":"normal"
-            let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":"#"+(i+1)
-            d.className="item "+cls
-            d.innerHTML=`<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`
-        }else{
-            d.className="item empty"
-            d.innerHTML=`<span>#${i+1} — Libre</span><span>—</span>`
+    getTop10FromFirebase((data) => {
+        for(let i=0;i<10;i++){
+            let d=document.createElement("div")
+            if(data[i]){
+                let cls=i==0?"gold":i==1?"silver":i==2?"bronze":"normal"
+                let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":"#"+(i+1)
+                d.className="item "+cls
+                d.innerHTML=`<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`
+            }else{
+                d.className="item empty"
+                d.innerHTML=`<span>#${i+1} — Libre</span><span>—</span>`
+            }
+            list.appendChild(d)
         }
-        list.appendChild(d)
-    }
+    })
     switchScreen(leader)
 }
 
@@ -295,11 +332,7 @@ function endGame(){
     let best=localStorage.getItem("bestScore")||0
     if(score>best)localStorage.setItem("bestScore",score)
 
-    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
-    data.push({name:player,score})
-    data.sort((a,b)=>b.score-a.score)
-    localStorage.setItem("leaderboard",JSON.stringify(data.slice(0,10)))
-
+    sendScoreToFirebase(player, score)
     updateBest()
 }
 
