@@ -8,22 +8,53 @@
 body{margin:0;background:black;color:white;font-family:Arial;overflow:hidden}
 .screen{position:absolute;inset:0;display:none}
 .active{display:flex}
+
+/* ACCUEIL */
 #home-screen,#leaderboard-screen{
     background:url("rocket-bg.jpg") center/cover;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:20px
+    gap:20px;
 }
 #title{font-size:42px;text-shadow:0 0 10px white}
 input,button{
     padding:12px 20px;
     font-size:18px;
     border-radius:10px;
-    border:none
+    border:none;
 }
-button{background:#2196f3;color:white}
-#game-screen{background:black}
+button{background:#2196f3;color:white;cursor:pointer}
+
+/* MEILLEUR SCORE */
+#best{
+    position:absolute;
+    bottom:20px;
+    left:20px;
+    font-size:18px;
+}
+
+/* CLASSEMENT */
+#leaderboard-list{
+    width:300px;
+}
+.item{
+    display:flex;
+    justify-content:space-between;
+    background:rgba(0,0,0,.6);
+    padding:8px;
+    margin:6px 0;
+    border-radius:8px;
+}
+
+/* JEU */
+#game-screen{background:black;overflow:hidden}
+.star{
+    position:absolute;
+    width:2px;height:2px;
+    background:white;
+    opacity:.8;
+}
 .rocket{
     position:absolute;
     bottom:40px;
@@ -31,16 +62,16 @@ button{background:#2196f3;color:white}
     background:red;
     left:50%;
     transform:translateX(-50%);
+    z-index:2;
 }
 .rock{
     position:absolute;
     width:50px;height:50px;
     background:gray;
     border-radius:50%;
+    z-index:2;
 }
-#score{position:absolute;top:10px;left:10px;font-size:22px}
-#leaderboard-list{width:300px}
-.item{display:flex;justify-content:space-between;background:rgba(0,0,0,.5);padding:8px;margin:5px;border-radius:8px}
+#score{position:absolute;top:10px;left:10px;font-size:22px;z-index:3}
 </style>
 </head>
 
@@ -52,6 +83,7 @@ button{background:#2196f3;color:white}
     <input id="pseudo" placeholder="Ton pseudo">
     <button onclick="play()">Jouer</button>
     <button onclick="showLeaderboard()">Classement</button>
+    <div id="best">Meilleur score : 0</div>
 </div>
 
 <!-- CLASSEMENT -->
@@ -73,16 +105,41 @@ const rocket=document.getElementById("rocket")
 const scoreTxt=document.getElementById("score")
 const list=document.getElementById("leaderboard-list")
 const pseudoInput=document.getElementById("pseudo")
+const bestTxt=document.getElementById("best")
 
 let x=window.innerWidth/2
 let score=0
 let speed=4
 let spawnDelay=800
 let gameOver=false
+let player=""
 
 function switchScreen(s){
     [home,game,leader].forEach(e=>e.classList.remove("active"))
     s.classList.add("active")
+}
+
+function updateBest(){
+    bestTxt.textContent="Meilleur score : "+(localStorage.getItem("bestScore")||0)
+}
+updateBest()
+
+/* ⭐ ÉTOILES */
+function spawnStars(){
+    document.querySelectorAll(".star").forEach(s=>s.remove())
+    for(let i=0;i<120;i++){
+        let s=document.createElement("div")
+        s.className="star"
+        s.style.left=Math.random()*innerWidth+"px"
+        s.style.top=Math.random()*innerHeight+"px"
+        game.appendChild(s)
+
+        setInterval(()=>{
+            if(!game.classList.contains("active"))return
+            let t=parseInt(s.style.top)
+            s.style.top=(t+2)%innerHeight+"px"
+        },60)
+    }
 }
 
 function play(){
@@ -93,6 +150,7 @@ function play(){
     gameOver=false
     scoreTxt.textContent="Score : 0"
     document.querySelectorAll(".rock").forEach(r=>r.remove())
+    spawnStars()
     switchScreen(game)
     loopScore()
     spawnRock()
@@ -101,10 +159,12 @@ function play(){
 function showLeaderboard(){
     list.innerHTML=""
     let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
-    data.slice(0,10).forEach((e,i)=>{
+
+    data.forEach((e,i)=>{
+        let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":(i+1)+"."
         let d=document.createElement("div")
         d.className="item"
-        d.innerHTML=`<span>${i+1}. ${e.name}</span><span>${e.score}</span>`
+        d.innerHTML=`<span>${medal} ${e.name}</span><span>${e.score}</span>`
         list.appendChild(d)
     })
     switchScreen(leader)
@@ -112,21 +172,22 @@ function showLeaderboard(){
 
 leader.onclick=()=>switchScreen(home)
 
+/* CONTROLES */
 document.addEventListener("keydown",e=>{
     if(!game.classList.contains("active"))return
     if(e.key==="ArrowLeft")x-=30
     if(e.key==="ArrowRight")x+=30
-    x=Math.max(0,Math.min(window.innerWidth-40,x))
+    x=Math.max(0,Math.min(innerWidth-40,x))
     rocket.style.left=x+"px"
 })
 
+/* SCORE + DIFFICULTÉ EXPONENTIELLE APRÈS 500 */
 function loopScore(){
     let i=setInterval(()=>{
         if(gameOver) return clearInterval(i)
         score++
         scoreTxt.textContent="Score : "+score
 
-        // EXPONENTIEL APRÈS 500
         if(score>=500){
             speed*=1.01
             spawnDelay=Math.max(200,spawnDelay*0.99)
@@ -134,11 +195,12 @@ function loopScore(){
     },200)
 }
 
+/* ROCHERS */
 function spawnRock(){
     if(gameOver)return
     let r=document.createElement("div")
     r.className="rock"
-    r.style.left=Math.random()*(window.innerWidth-50)+"px"
+    r.style.left=Math.random()*(innerWidth-50)+"px"
     r.style.top="-60px"
     game.appendChild(r)
 
@@ -152,7 +214,7 @@ function spawnRock(){
             end()
             clearInterval(fall)
         }
-        if(t>window.innerHeight){
+        if(t>innerHeight){
             r.remove()
             clearInterval(fall)
         }
@@ -163,10 +225,16 @@ function spawnRock(){
 
 function end(){
     gameOver=true
+
+    let best=localStorage.getItem("bestScore")||0
+    if(score>best) localStorage.setItem("bestScore",score)
+
     let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
     data.push({name:player,score})
     data.sort((a,b)=>b.score-a.score)
     localStorage.setItem("leaderboard",JSON.stringify(data.slice(0,10)))
+
+    updateBest()
     setTimeout(()=>switchScreen(home),1500)
 }
 </script>
