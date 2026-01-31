@@ -13,11 +13,13 @@
             text-align: center;
         }
 
+        /* Fond étoilé derrière tout */
         #game-container {
             position: fixed;
             inset: 0;
             overflow: hidden;
-            z-index: -1;
+            z-index: -10;
+            pointer-events: none; /* IMPORTANT : ne bloque plus les clics */
         }
 
         .star {
@@ -29,6 +31,7 @@
             border-radius: 50%;
         }
 
+        /* Écrans */
         .screen {
             position: absolute;
             inset: 0;
@@ -39,6 +42,7 @@
             display: block;
         }
 
+        /* Accueil */
         #home-screen {
             display: flex;
             flex-direction: column;
@@ -82,6 +86,7 @@
             font-size: 18px;
         }
 
+        /* Classement */
         #leaderboard-screen {
             display: flex;
             flex-direction: column;
@@ -114,6 +119,7 @@
             margin-right: 8px;
         }
 
+        /* Jeu */
         #game-screen {
             position: relative;
         }
@@ -202,25 +208,13 @@
             line-height: 120px;
             user-select: none;
         }
-
-        #back-home-game {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            padding: 6px 12px;
-            font-size: 14px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            background: rgba(0,0,0,0.5);
-            color: white;
-        }
     </style>
 </head>
 <body>
 
 <div id="game-container"></div>
 
+<!-- ACCUEIL -->
 <div id="home-screen" class="screen active">
     <div id="title">FUSÉE INFINITY</div>
     <input id="pseudo-input" type="text" placeholder="Ton pseudo">
@@ -229,12 +223,14 @@
     <div id="best-score-display">Meilleur score : 0</div>
 </div>
 
+<!-- CLASSEMENT -->
 <div id="leaderboard-screen" class="screen">
     <div id="leaderboard-title">Top 10</div>
     <div id="leaderboard-list"></div>
     <button id="back-home" class="menu-button">Retour</button>
 </div>
 
+<!-- JEU -->
 <div id="game-screen" class="screen">
     <div id="score">Score : 0</div>
     <div id="message"></div>
@@ -247,8 +243,6 @@
         <div class="btn" id="left">←</div>
         <div class="btn" id="right">→</div>
     </div>
-
-    <button id="back-home-game">Quitter</button>
 </div>
 
 <script>
@@ -264,7 +258,6 @@ const leaderboardButton = document.getElementById("leaderboard-button");
 const bestScoreDisplay = document.getElementById("best-score-display");
 
 const backHome = document.getElementById("back-home");
-const backHomeGame = document.getElementById("back-home-game");
 
 const leaderboardList = document.getElementById("leaderboard-list");
 
@@ -377,23 +370,19 @@ function moveRocket() {
 
 /* ---------- DIFFICULTÉ EXPONENTIELLE ---------- */
 
-let baseSpeed = 4;          // vitesse de base des rochers
-let speedMultiplier = 1;    // multiplicateur exponentiel
-let spawnBase = 800;        // délai de spawn de base
-let spawnMultiplier = 1;    // multiplicateur exponentiel
-let pointInterval = 400;    // intervalle de points de base
-let pointMultiplier = 1;    // multiplicateur exponentiel
+let baseSpeed = 4;
+let speedMultiplier = 1;
+let spawnBase = 800;
+let spawnMultiplier = 1;
+let pointInterval = 400;
+let pointMultiplier = 1;
 
-// Liste des paliers fixes
 const fixedThresholds = [100, 250, 500, 1000, 1500];
-
-// On garde en mémoire les paliers déjà activés
 let activatedThresholds = new Set();
 
 function updateDifficulty() {
     let thresholds = [...fixedThresholds];
 
-    // Paliers infinis tous les 500 après 1500
     if (score >= 1500) {
         let extra = Math.floor((score - 1500) / 500);
         for (let i = 0; i <= extra; i++) {
@@ -405,12 +394,10 @@ function updateDifficulty() {
         if (score >= t && !activatedThresholds.has(t)) {
             activatedThresholds.add(t);
 
-            // On double tout
             speedMultiplier *= 2;
             spawnMultiplier *= 2;
             pointMultiplier *= 2;
 
-            // Mise à jour des valeurs
             speed = baseSpeed * speedMultiplier;
             currentSpawnDelay = Math.max(50, spawnBase / spawnMultiplier);
             currentPointDelay = Math.max(20, pointInterval / pointMultiplier);
@@ -498,6 +485,10 @@ function endGame() {
     setLeaderboard(leaderboard);
 
     updateBestScoreDisplay();
+
+    setTimeout(() => {
+        showScreen(homeScreen);
+    }, 2000);
 }
 
 /* ---------- Lancement du jeu ---------- */
@@ -550,13 +541,6 @@ leaderboardButton.addEventListener("click", () => {
 });
 
 backHome.addEventListener("click", () => {
-    showScreen(homeScreen);
-});
-
-backHomeGame.addEventListener("click", () => {
-    gameOver = true;
-    clearInterval(scoreInterval);
-    clearInterval(moveInterval);
     showScreen(homeScreen);
 });
 
