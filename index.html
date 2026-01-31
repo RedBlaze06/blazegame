@@ -10,7 +10,7 @@ body{margin:0;background:black;color:white;font-family:Arial;overflow:hidden}
 .active{display:flex}
 
 /* ACCUEIL */
-#home-screen,#leaderboard-screen{
+#home-screen{
     background:url("rocket-bg.jpg") center/cover;
     flex-direction:column;
     align-items:center;
@@ -25,8 +25,6 @@ input,button{
     border:none;
 }
 button{background:#2196f3;color:white;cursor:pointer}
-
-/* MEILLEUR SCORE */
 #best{
     position:absolute;
     bottom:20px;
@@ -34,17 +32,41 @@ button{background:#2196f3;color:white;cursor:pointer}
     font-size:18px;
 }
 
-/* CLASSEMENT */
+/* ===== CLASSEMENT ===== */
+#leaderboard-screen{
+    background:linear-gradient(180deg,#0f2027,#203a43,#2c5364);
+    flex-direction:column;
+    align-items:center;
+    padding-top:30px;
+}
+#leader-title{
+    font-size:36px;
+    margin-bottom:5px;
+    text-shadow:0 0 10px gold;
+}
+#leader-sub{
+    font-size:18px;
+    opacity:.8;
+    margin-bottom:20px;
+}
 #leaderboard-list{
-    width:300px;
+    width:320px;
 }
 .item{
     display:flex;
     justify-content:space-between;
-    background:rgba(0,0,0,.6);
-    padding:8px;
-    margin:6px 0;
-    border-radius:8px;
+    padding:10px;
+    margin:8px 0;
+    border-radius:12px;
+    font-size:18px;
+}
+.gold{background:linear-gradient(90deg,#ffd700,#ffb300);color:black}
+.silver{background:linear-gradient(90deg,#cfd8dc,#b0bec5);color:black}
+.bronze{background:linear-gradient(90deg,#cd7f32,#a97142);color:black}
+.normal{background:rgba(255,255,255,.15)}
+.empty{
+    border:2px dashed rgba(255,255,255,.3);
+    color:rgba(255,255,255,.5);
 }
 
 /* JEU */
@@ -88,6 +110,8 @@ button{background:#2196f3;color:white;cursor:pointer}
 
 <!-- CLASSEMENT -->
 <div id="leaderboard-screen" class="screen">
+    <div id="leader-title">🏆 CLASSEMENT</div>
+    <div id="leader-sub">TOP 1 → TOP 10</div>
     <div id="leaderboard-list"></div>
 </div>
 
@@ -107,12 +131,7 @@ const list=document.getElementById("leaderboard-list")
 const pseudoInput=document.getElementById("pseudo")
 const bestTxt=document.getElementById("best")
 
-let x=window.innerWidth/2
-let score=0
-let speed=4
-let spawnDelay=800
-let gameOver=false
-let player=""
+let x=innerWidth/2,score=0,speed=4,spawnDelay=800,gameOver=false,player=""
 
 function switchScreen(s){
     [home,game,leader].forEach(e=>e.classList.remove("active"))
@@ -124,7 +143,7 @@ function updateBest(){
 }
 updateBest()
 
-/* ⭐ ÉTOILES */
+/* ÉTOILES */
 function spawnStars(){
     document.querySelectorAll(".star").forEach(s=>s.remove())
     for(let i=0;i<120;i++){
@@ -133,21 +152,16 @@ function spawnStars(){
         s.style.left=Math.random()*innerWidth+"px"
         s.style.top=Math.random()*innerHeight+"px"
         game.appendChild(s)
-
         setInterval(()=>{
             if(!game.classList.contains("active"))return
-            let t=parseInt(s.style.top)
-            s.style.top=(t+2)%innerHeight+"px"
+            s.style.top=(parseInt(s.style.top)+2)%innerHeight+"px"
         },60)
     }
 }
 
 function play(){
     player=pseudoInput.value||"Anonyme"
-    score=0
-    speed=4
-    spawnDelay=800
-    gameOver=false
+    score=0;speed=4;spawnDelay=800;gameOver=false
     scoreTxt.textContent="Score : 0"
     document.querySelectorAll(".rock").forEach(r=>r.remove())
     spawnStars()
@@ -160,13 +174,19 @@ function showLeaderboard(){
     list.innerHTML=""
     let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
 
-    data.forEach((e,i)=>{
-        let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":(i+1)+"."
+    for(let i=0;i<10;i++){
         let d=document.createElement("div")
-        d.className="item"
-        d.innerHTML=`<span>${medal} ${e.name}</span><span>${e.score}</span>`
+        if(data[i]){
+            let cls=i==0?"gold":i==1?"silver":i==2?"bronze":"normal"
+            let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":`#${i+1}`
+            d.className="item "+cls
+            d.innerHTML=`<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`
+        }else{
+            d.className="item empty"
+            d.innerHTML=`<span>#${i+1} — Libre</span><span>—</span>`
+        }
         list.appendChild(d)
-    })
+    }
     switchScreen(leader)
 }
 
@@ -181,21 +201,14 @@ document.addEventListener("keydown",e=>{
     rocket.style.left=x+"px"
 })
 
-/* SCORE + DIFFICULTÉ EXPONENTIELLE APRÈS 500 */
 function loopScore(){
     let i=setInterval(()=>{
-        if(gameOver) return clearInterval(i)
-        score++
-        scoreTxt.textContent="Score : "+score
-
-        if(score>=500){
-            speed*=1.01
-            spawnDelay=Math.max(200,spawnDelay*0.99)
-        }
+        if(gameOver)return clearInterval(i)
+        score++;scoreTxt.textContent="Score : "+score
+        if(score>=500){speed*=1.01;spawnDelay=Math.max(200,spawnDelay*0.99)}
     },200)
 }
 
-/* ROCHERS */
 function spawnRock(){
     if(gameOver)return
     let r=document.createElement("div")
@@ -207,37 +220,26 @@ function spawnRock(){
     let fall=setInterval(()=>{
         let t=parseInt(r.style.top)
         r.style.top=t+speed+"px"
-        let a=r.getBoundingClientRect()
-        let b=rocket.getBoundingClientRect()
-
+        let a=r.getBoundingClientRect(),b=rocket.getBoundingClientRect()
         if(a.bottom>b.top && a.top<b.bottom && a.left<b.right && a.right>b.left){
-            end()
-            clearInterval(fall)
+            end();clearInterval(fall)
         }
-        if(t>innerHeight){
-            r.remove()
-            clearInterval(fall)
-        }
+        if(t>innerHeight){r.remove();clearInterval(fall)}
     },20)
-
     setTimeout(spawnRock,spawnDelay)
 }
 
 function end(){
     gameOver=true
-
     let best=localStorage.getItem("bestScore")||0
-    if(score>best) localStorage.setItem("bestScore",score)
-
+    if(score>best)localStorage.setItem("bestScore",score)
     let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
     data.push({name:player,score})
     data.sort((a,b)=>b.score-a.score)
     localStorage.setItem("leaderboard",JSON.stringify(data.slice(0,10)))
-
     updateBest()
     setTimeout(()=>switchScreen(home),1500)
 }
 </script>
-
 </body>
 </html>
