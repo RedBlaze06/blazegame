@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Fusée du GOAT</title>
+    <title>Fusée Infinity</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body {
@@ -13,25 +13,23 @@
             text-align: center;
         }
 
-        .star {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: white;
-            opacity: 0.8;
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
+        /* Écrans */
         .screen {
             position: absolute;
             inset: 0;
             display: none;
-            z-index: 1;
         }
 
         .screen.active {
             display: block;
+        }
+
+        /* Accueil & classement : fond fusée réaliste */
+        #home-screen,
+        #leaderboard-screen {
+            background-image: url("rocket-bg.jpg"); /* mets ici ton image de fusée */
+            background-size: cover;
+            background-position: center;
         }
 
         #home-screen {
@@ -82,6 +80,7 @@
             text-align: left;
         }
 
+        /* Classement */
         #leaderboard-screen {
             display: flex;
             flex-direction: column;
@@ -101,7 +100,7 @@
             align-items: center;
             padding: 8px 10px;
             margin-bottom: 6px;
-            background: rgba(255,255,255,0.05);
+            background: rgba(0,0,0,0.5);
             border-radius: 8px;
         }
 
@@ -115,8 +114,22 @@
             left: 20px;
         }
 
+        /* Jeu */
         #game-screen {
             position: relative;
+            background: black;
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            opacity: 0.8;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
         }
 
         .rocket {
@@ -128,6 +141,7 @@
             height: 80px;
             background: #d32f2f;
             border-radius: 10px 10px 0 0;
+            z-index: 2;
         }
 
         .rocket::before {
@@ -169,6 +183,7 @@
             background: #777;
             border-radius: 50%;
             box-shadow: inset -5px -5px 10px #555;
+            z-index: 1;
         }
 
         #score {
@@ -176,6 +191,7 @@
             top: 10px;
             left: 10px;
             font-size: 24px;
+            z-index: 3;
         }
 
         #message {
@@ -184,6 +200,7 @@
             width: 100%;
             font-size: 32px;
             display: none;
+            z-index: 3;
         }
 
         #controls {
@@ -192,6 +209,7 @@
             width: 100%;
             display: flex;
             justify-content: space-around;
+            z-index: 3;
         }
 
         .btn {
@@ -238,23 +256,6 @@
 </div>
 
 <script>
-/* ---------- Fond étoilé simple ---------- */
-function spawnStars() {
-    for (let i = 0; i < 120; i++) {
-        let s = document.createElement("div");
-        s.classList.add("star");
-        s.style.left = Math.random() * window.innerWidth + "px";
-        s.style.top = Math.random() * window.innerHeight + "px";
-        document.body.appendChild(s);
-
-        setInterval(() => {
-            let top = parseInt(s.style.top);
-            s.style.top = (top + 2) % window.innerHeight + "px";
-        }, 60);
-    }
-}
-spawnStars();
-
 /* ---------- Sélecteurs ---------- */
 const homeScreen = document.getElementById("home-screen");
 const gameScreen = document.getElementById("game-screen");
@@ -279,6 +280,26 @@ let scoreInterval = null;
 let moveInterval = null;
 
 let currentPlayer = "";
+
+/* ---------- Fond étoilé dans le jeu uniquement ---------- */
+function spawnStarsInGame() {
+    // Nettoyer les anciennes étoiles
+    document.querySelectorAll("#game-screen .star").forEach(s => s.remove());
+
+    for (let i = 0; i < 120; i++) {
+        let s = document.createElement("div");
+        s.classList.add("star");
+        s.style.left = Math.random() * window.innerWidth + "px";
+        s.style.top = Math.random() * window.innerHeight + "px";
+        gameScreen.appendChild(s);
+
+        setInterval(() => {
+            if (!gameScreen.classList.contains("active")) return;
+            let top = parseInt(s.style.top);
+            s.style.top = (top + 2) % window.innerHeight + "px";
+        }, 60);
+    }
+}
 
 /* ---------- LocalStorage ---------- */
 function getBestScore() {
@@ -411,7 +432,7 @@ function spawnRock() {
     gameScreen.appendChild(rock);
 
     let fall = setInterval(() => {
-        if (gameOver) {
+        if (gameOver || !gameScreen.classList.contains("active")) {
             clearInterval(fall);
             rock.remove();
             return;
@@ -449,7 +470,7 @@ function spawnRock() {
 function restartScoreLoop() {
     clearInterval(scoreInterval);
     scoreInterval = setInterval(() => {
-        if (!gameOver) {
+        if (!gameOver && gameScreen.classList.contains("active")) {
             score++;
             scoreDisplay.textContent = "Score : " + score;
             updateDifficulty();
@@ -492,14 +513,17 @@ function startGame() {
     activatedThresholds.clear();
 
     message.style.display = "none";
-    scoreDisplay.textContent = "Score : 0";
+    scoreDisplay.textContent = "Score : " + score;
 
     rocketX = window.innerWidth / 2;
     moveRocket();
 
-    document.querySelectorAll(".rock").forEach(r => r.remove());
+    document.querySelectorAll("#game-screen .rock").forEach(r => r.remove());
+    document.querySelectorAll("#game-screen .star").forEach(s => s.remove());
 
-    if (moveInterval) clearInterval(moveInterval);
+    spawnStarsInGame();
+
+    clearInterval(moveInterval);
     moveInterval = setInterval(moveRocket, 20);
 
     restartScoreLoop();
