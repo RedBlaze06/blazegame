@@ -5,17 +5,13 @@
 <title>Fusée Infinity</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body{margin:0;background:black;color:white;font-family:Arial;overflow:hidden}
-.screen{position:absolute;inset:0;display:none}
+body{margin:0;background:black;color:white;font-family:Arial, sans-serif;overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px}
 .active{display:flex}
 
 /* ===== ACCUEIL ===== */
 #home-screen{
     background:url("rocket-bg.jpg") center/cover;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:20px;
 }
 #title{font-size:42px;text-shadow:0 0 10px white}
 input,button{
@@ -30,8 +26,6 @@ button{background:#2196f3;color:white;cursor:pointer}
 /* ===== CLASSEMENT ===== */
 #leaderboard-screen{
     background:linear-gradient(180deg,#0f2027,#203a43,#2c5364);
-    flex-direction:column;
-    align-items:center;
     padding-top:30px;
     gap:15px;
 }
@@ -52,7 +46,7 @@ button{background:#2196f3;color:white;cursor:pointer}
 .empty{border:2px dashed rgba(255,255,255,.3);opacity:.5}
 
 /* ===== JEU ===== */
-#game-screen{background:black;overflow:hidden}
+#game-screen{background:black;overflow:hidden;position:relative;width:100%;height:100%}
 .star{position:absolute;width:2px;height:2px;background:white;opacity:.8}
 
 /* Fusée stylée */
@@ -145,6 +139,7 @@ button{background:#2196f3;color:white;cursor:pointer}
     <div id="gameover">
         <h1>💥 VOUS AVEZ PERDU 💥</h1>
         <div id="finalScore"></div>
+        <div id="bestGameScore"></div>
         <button onclick="goHome()">Retour</button>
     </div>
 </div>
@@ -159,9 +154,12 @@ const bestTxt=document.getElementById("best")
 const list=document.getElementById("leaderboard-list")
 const gameover=document.getElementById("gameover")
 const finalScore=document.getElementById("finalScore")
+const bestGameScore=document.getElementById("bestGameScore")
 const pseudoInput=document.getElementById("pseudo")
 
 let x=innerWidth/2,score=0,speed=4,spawnDelay=800,gameOver=false,player=""
+let speedMultiplier=1,pointMultiplier=1,activatedThresholds=new Set()
+let scoreInterval=null
 
 function switchScreen(s){
     [home,game,leader].forEach(e=>e.classList.remove("active"))
@@ -193,6 +191,7 @@ function spawnStars(){
 function play(){
     player=pseudoInput.value||"Anonyme"
     score=0;speed=4;spawnDelay=800;gameOver=false
+    speedMultiplier=1;pointMultiplier=1;activatedThresholds=new Set()
     scoreTxt.textContent="Score : 0"
     gameover.style.display="none"
     document.querySelectorAll(".rock").forEach(r=>r.remove())
@@ -202,11 +201,41 @@ function play(){
     spawnRock()
 }
 
+/* SCORE EXPONENTIEL ET DIFFICULTÉ */
+function loopScore(){
+    clearInterval(scoreInterval)
+    scoreInterval=setInterval(()=>{
+        if(gameOver)return
+        score++
+        scoreTxt.textContent="Score : "+score
+        updateDifficulty()
+    },200/pointMultiplier)
+}
+
+function updateDifficulty(){
+    let thresholds=[100,250,500,1000]
+    // paliers infinis tous les 500 après 500
+    if(score>=1500){
+        let extra=Math.floor((score-1500)/500)
+        for(let i=0;i<=extra;i++) thresholds.push(1500+i*500)
+    }
+    thresholds.forEach(t=>{
+        if(score>=t && !activatedThresholds.has(t)){
+            activatedThresholds.add(t)
+            speedMultiplier*=2
+            pointMultiplier*=2
+            speed=4*speedMultiplier
+            spawnDelay=Math.max(100,800/speedMultiplier)
+            clearInterval(scoreInterval)
+            loopScore()
+        }
+    })
+}
+
 /* CLASSEMENT */
 function showLeaderboard(){
     list.innerHTML=""
     let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
-
     for(let i=0;i<10;i++){
         let d=document.createElement("div")
         if(data[i]){
@@ -232,15 +261,6 @@ document.addEventListener("keydown",e=>{
     rocket.style.left=x+"px"
 })
 
-function loopScore(){
-    let i=setInterval(()=>{
-        if(gameOver)return clearInterval(i)
-        score++
-        scoreTxt.textContent="Score : "+score
-        if(score>=500){speed*=1.01;spawnDelay=Math.max(200,spawnDelay*.99)}
-    },200)
-}
-
 function spawnRock(){
     if(gameOver)return
     let r=document.createElement("div")
@@ -265,6 +285,7 @@ function spawnRock(){
 function endGame(){
     gameOver=true
     finalScore.textContent="Score : "+score
+    bestGameScore.textContent="Meilleur score : "+(localStorage.getItem("bestScore")||0)
     gameover.style.display="flex"
 
     let best=localStorage.getItem("bestScore")||0
