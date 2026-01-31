@@ -1,563 +1,174 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Fusée Infinity</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background: black;
-            font-family: Arial, sans-serif;
-            color: white;
-            text-align: center;
-        }
-
-        /* Écrans */
-        .screen {
-            position: absolute;
-            inset: 0;
-            display: none;
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        /* Accueil & classement : fond fusée réaliste */
-        #home-screen,
-        #leaderboard-screen {
-            background-image: url("rocket-bg.jpg"); /* mets ici ton image de fusée */
-            background-size: cover;
-            background-position: center;
-        }
-
-        #home-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        #title {
-            font-size: 48px;
-            letter-spacing: 4px;
-            text-shadow: 0 0 10px #fff;
-            margin-bottom: 20px;
-        }
-
-        #pseudo-input {
-            padding: 10px 15px;
-            font-size: 18px;
-            border-radius: 8px;
-            border: none;
-            outline: none;
-            width: 220px;
-            text-align: center;
-        }
-
-        .menu-button {
-            padding: 12px 25px;
-            font-size: 20px;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            background: #2196f3;
-            color: white;
-            box-shadow: 0 0 10px rgba(33,150,243,0.7);
-        }
-
-        .menu-button:active {
-            transform: scale(0.97);
-        }
-
-        #best-score-display {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            font-size: 18px;
-            text-align: left;
-        }
-
-        /* Classement */
-        #leaderboard-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 60px;
-        }
-
-        #leaderboard-list {
-            width: 90%;
-            max-width: 400px;
-            text-align: left;
-        }
-
-        .leaderboard-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-            margin-bottom: 6px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 8px;
-        }
-
-        .medal {
-            margin-right: 8px;
-        }
-
-        #back-home {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-        }
-
-        /* Jeu */
-        #game-screen {
-            position: relative;
-            background: black;
-            overflow: hidden;
-        }
-
-        .star {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: white;
-            opacity: 0.8;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .rocket {
-            position: absolute;
-            bottom: 50px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 80px;
-            background: #d32f2f;
-            border-radius: 10px 10px 0 0;
-            z-index: 2;
-        }
-
-        .rocket::before {
-            content: "";
-            position: absolute;
-            top: -25px;
-            left: 0;
-            width: 40px;
-            height: 25px;
-            background: #b71c1c;
-            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-        }
-
-        .rocket::after {
-            content: "";
-            position: absolute;
-            bottom: -20px;
-            left: -15px;
-            width: 30px;
-            height: 20px;
-            background: #ff9800;
-            clip-path: polygon(0% 100%, 100% 100%, 100% 0%);
-        }
-
-        .wing-right {
-            position: absolute;
-            bottom: -20px;
-            right: -15px;
-            width: 30px;
-            height: 20px;
-            background: #ff9800;
-            clip-path: polygon(0% 100%, 100% 100%, 0% 0%);
-        }
-
-        .rock {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            background: #777;
-            border-radius: 50%;
-            box-shadow: inset -5px -5px 10px #555;
-            z-index: 1;
-        }
-
-        #score {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 24px;
-            z-index: 3;
-        }
-
-        #message {
-            position: absolute;
-            top: 40%;
-            width: 100%;
-            font-size: 32px;
-            display: none;
-            z-index: 3;
-        }
-
-        #controls {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            z-index: 3;
-        }
-
-        .btn {
-            width: 120px;
-            height: 120px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 20px;
-            font-size: 40px;
-            line-height: 120px;
-            user-select: none;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Fusée Infinity</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{margin:0;background:black;color:white;font-family:Arial;overflow:hidden}
+.screen{position:absolute;inset:0;display:none}
+.active{display:flex}
+#home-screen,#leaderboard-screen{
+    background:url("rocket-bg.jpg") center/cover;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:20px
+}
+#title{font-size:42px;text-shadow:0 0 10px white}
+input,button{
+    padding:12px 20px;
+    font-size:18px;
+    border-radius:10px;
+    border:none
+}
+button{background:#2196f3;color:white}
+#game-screen{background:black}
+.rocket{
+    position:absolute;
+    bottom:40px;
+    width:40px;height:80px;
+    background:red;
+    left:50%;
+    transform:translateX(-50%);
+}
+.rock{
+    position:absolute;
+    width:50px;height:50px;
+    background:gray;
+    border-radius:50%;
+}
+#score{position:absolute;top:10px;left:10px;font-size:22px}
+#leaderboard-list{width:300px}
+.item{display:flex;justify-content:space-between;background:rgba(0,0,0,.5);padding:8px;margin:5px;border-radius:8px}
+</style>
 </head>
+
 <body>
 
-<!-- Accueil -->
+<!-- ACCUEIL -->
 <div id="home-screen" class="screen active">
     <div id="title">FUSÉE INFINITY</div>
-    <input id="pseudo-input" type="text" placeholder="Ton pseudo">
-    <button id="play-button" class="menu-button">Jouer</button>
-    <button id="leaderboard-button" class="menu-button">Classement</button>
-    <div id="best-score-display">Meilleur score : 0</div>
+    <input id="pseudo" placeholder="Ton pseudo">
+    <button onclick="play()">Jouer</button>
+    <button onclick="showLeaderboard()">Classement</button>
 </div>
 
-<!-- Classement -->
+<!-- CLASSEMENT -->
 <div id="leaderboard-screen" class="screen">
     <div id="leaderboard-list"></div>
-    <button id="back-home" class="menu-button">Retour</button>
 </div>
 
-<!-- Jeu -->
+<!-- JEU -->
 <div id="game-screen" class="screen">
     <div id="score">Score : 0</div>
-    <div id="message"></div>
-
-    <div class="rocket" id="rocket">
-        <div class="wing-right"></div>
-    </div>
-
-    <div id="controls">
-        <div class="btn" id="left">←</div>
-        <div class="btn" id="right">→</div>
-    </div>
+    <div class="rocket" id="rocket"></div>
 </div>
 
 <script>
-/* ---------- Sélecteurs ---------- */
-const homeScreen = document.getElementById("home-screen");
-const gameScreen = document.getElementById("game-screen");
-const leaderboardScreen = document.getElementById("leaderboard-screen");
+const home=document.getElementById("home-screen")
+const game=document.getElementById("game-screen")
+const leader=document.getElementById("leaderboard-screen")
+const rocket=document.getElementById("rocket")
+const scoreTxt=document.getElementById("score")
+const list=document.getElementById("leaderboard-list")
+const pseudoInput=document.getElementById("pseudo")
 
-const pseudoInput = document.getElementById("pseudo-input");
-const playButton = document.getElementById("play-button");
-const leaderboardButton = document.getElementById("leaderboard-button");
-const bestScoreDisplay = document.getElementById("best-score-display");
-const backHome = document.getElementById("back-home");
-const leaderboardList = document.getElementById("leaderboard-list");
+let x=window.innerWidth/2
+let score=0
+let speed=4
+let spawnDelay=800
+let gameOver=false
 
-let rocket = document.getElementById("rocket");
-let scoreDisplay = document.getElementById("score");
-let message = document.getElementById("message");
-
-let rocketX = window.innerWidth / 2;
-let score = 0;
-let gameOver = false;
-
-let scoreInterval = null;
-let moveInterval = null;
-
-let currentPlayer = "";
-
-/* ---------- Fond étoilé dans le jeu uniquement ---------- */
-function spawnStarsInGame() {
-    // Nettoyer les anciennes étoiles
-    document.querySelectorAll("#game-screen .star").forEach(s => s.remove());
-
-    for (let i = 0; i < 120; i++) {
-        let s = document.createElement("div");
-        s.classList.add("star");
-        s.style.left = Math.random() * window.innerWidth + "px";
-        s.style.top = Math.random() * window.innerHeight + "px";
-        gameScreen.appendChild(s);
-
-        setInterval(() => {
-            if (!gameScreen.classList.contains("active")) return;
-            let top = parseInt(s.style.top);
-            s.style.top = (top + 2) % window.innerHeight + "px";
-        }, 60);
-    }
+function switchScreen(s){
+    [home,game,leader].forEach(e=>e.classList.remove("active"))
+    s.classList.add("active")
 }
 
-/* ---------- LocalStorage ---------- */
-function getBestScore() {
-    return parseInt(localStorage.getItem("bestScore") || "0", 10);
+function play(){
+    player=pseudoInput.value||"Anonyme"
+    score=0
+    speed=4
+    spawnDelay=800
+    gameOver=false
+    scoreTxt.textContent="Score : 0"
+    document.querySelectorAll(".rock").forEach(r=>r.remove())
+    switchScreen(game)
+    loopScore()
+    spawnRock()
 }
 
-function setBestScore(value) {
-    localStorage.setItem("bestScore", value.toString());
+function showLeaderboard(){
+    list.innerHTML=""
+    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
+    data.slice(0,10).forEach((e,i)=>{
+        let d=document.createElement("div")
+        d.className="item"
+        d.innerHTML=`<span>${i+1}. ${e.name}</span><span>${e.score}</span>`
+        list.appendChild(d)
+    })
+    switchScreen(leader)
 }
 
-function getLeaderboard() {
-    let data = localStorage.getItem("leaderboard");
-    if (!data) return [];
-    try { return JSON.parse(data); }
-    catch { return []; }
-}
+leader.onclick=()=>switchScreen(home)
 
-function setLeaderboard(list) {
-    localStorage.setItem("leaderboard", JSON.stringify(list));
-}
+document.addEventListener("keydown",e=>{
+    if(!game.classList.contains("active"))return
+    if(e.key==="ArrowLeft")x-=30
+    if(e.key==="ArrowRight")x+=30
+    x=Math.max(0,Math.min(window.innerWidth-40,x))
+    rocket.style.left=x+"px"
+})
 
-function updateBestScoreDisplay() {
-    bestScoreDisplay.textContent = "Meilleur score : " + getBestScore();
-}
+function loopScore(){
+    let i=setInterval(()=>{
+        if(gameOver) return clearInterval(i)
+        score++
+        scoreTxt.textContent="Score : "+score
 
-/* ---------- Navigation ---------- */
-function showScreen(screen) {
-    [homeScreen, gameScreen, leaderboardScreen].forEach(s => s.classList.remove("active"));
-    screen.classList.add("active");
-}
-
-/* ---------- Classement ---------- */
-function renderLeaderboard() {
-    const leaderboard = getLeaderboard().sort((a, b) => b.score - a.score).slice(0, 10);
-    leaderboardList.innerHTML = "";
-
-    if (leaderboard.length === 0) {
-        leaderboardList.innerHTML = "<p>Aucun score pour l'instant.</p>";
-        return;
-    }
-
-    leaderboard.forEach((entry, index) => {
-        const div = document.createElement("div");
-        div.classList.add("leaderboard-item");
-
-        const medal = document.createElement("span");
-        medal.classList.add("medal");
-
-        if (index === 0) medal.textContent = "🥇";
-        else if (index === 1) medal.textContent = "🥈";
-        else if (index === 2) medal.textContent = "🥉";
-        else medal.textContent = (index + 1) + ".";
-
-        const name = document.createElement("span");
-        name.textContent = entry.name;
-
-        const scoreSpan = document.createElement("span");
-        scoreSpan.textContent = entry.score;
-
-        div.appendChild(medal);
-        div.appendChild(name);
-        div.appendChild(scoreSpan);
-
-        leaderboardList.appendChild(div);
-    });
-}
-
-/* ---------- Fusée ---------- */
-function clampRocket() {
-    if (rocketX < 20) rocketX = 20;
-    if (rocketX > window.innerWidth - 60) rocketX = window.innerWidth - 60;
-}
-
-function moveRocket() {
-    clampRocket();
-    rocket.style.left = rocketX + "px";
-}
-
-/* ---------- Difficulté exponentielle ---------- */
-let baseSpeed = 4;
-let speedMultiplier = 1;
-let spawnBase = 800;
-let spawnMultiplier = 1;
-let pointInterval = 400;
-let pointMultiplier = 1;
-
-const fixedThresholds = [100, 250, 500, 1000, 1500];
-let activatedThresholds = new Set();
-
-let speed = baseSpeed;
-let currentSpawnDelay = spawnBase;
-let currentPointDelay = pointInterval;
-
-function updateDifficulty() {
-    let thresholds = [...fixedThresholds];
-
-    if (score >= 1500) {
-        let extra = Math.floor((score - 1500) / 500);
-        for (let i = 0; i <= extra; i++) {
-            thresholds.push(1500 + i * 500);
+        // EXPONENTIEL APRÈS 500
+        if(score>=500){
+            speed*=1.01
+            spawnDelay=Math.max(200,spawnDelay*0.99)
         }
-    }
-
-    thresholds.forEach(t => {
-        if (score >= t && !activatedThresholds.has(t)) {
-            activatedThresholds.add(t);
-
-            speedMultiplier *= 2;
-            spawnMultiplier *= 2;
-            pointMultiplier *= 2;
-
-            speed = baseSpeed * speedMultiplier;
-            currentSpawnDelay = Math.max(50, spawnBase / spawnMultiplier);
-            currentPointDelay = Math.max(20, pointInterval / pointMultiplier);
-
-            restartScoreLoop();
-        }
-    });
+    },200)
 }
 
-/* ---------- Astéroïdes ---------- */
-function spawnRock() {
-    if (gameOver) return;
+function spawnRock(){
+    if(gameOver)return
+    let r=document.createElement("div")
+    r.className="rock"
+    r.style.left=Math.random()*(window.innerWidth-50)+"px"
+    r.style.top="-60px"
+    game.appendChild(r)
 
-    let rock = document.createElement("div");
-    rock.classList.add("rock");
-    rock.style.left = Math.random() * (window.innerWidth - 60) + "px";
-    rock.style.top = "-60px";
+    let fall=setInterval(()=>{
+        let t=parseInt(r.style.top)
+        r.style.top=t+speed+"px"
+        let a=r.getBoundingClientRect()
+        let b=rocket.getBoundingClientRect()
 
-    gameScreen.appendChild(rock);
-
-    let fall = setInterval(() => {
-        if (gameOver || !gameScreen.classList.contains("active")) {
-            clearInterval(fall);
-            rock.remove();
-            return;
+        if(a.bottom>b.top && a.top<b.bottom && a.left<b.right && a.right>b.left){
+            end()
+            clearInterval(fall)
         }
-
-        let top = parseInt(rock.style.top);
-        rock.style.top = top + speed + "px";
-
-        let r = rock.getBoundingClientRect();
-        let f = rocket.getBoundingClientRect();
-
-        if (
-            r.left < f.right &&
-            r.right > f.left &&
-            r.top < f.bottom &&
-            r.bottom > f.top
-        ) {
-            gameOver = true;
-            endGame();
-            clearInterval(fall);
-            rock.remove();
-            return;
+        if(t>window.innerHeight){
+            r.remove()
+            clearInterval(fall)
         }
+    },20)
 
-        if (top > window.innerHeight) {
-            rock.remove();
-            clearInterval(fall);
-        }
-    }, 20);
-
-    setTimeout(spawnRock, currentSpawnDelay);
+    setTimeout(spawnRock,spawnDelay)
 }
 
-/* ---------- Score exponentiel ---------- */
-function restartScoreLoop() {
-    clearInterval(scoreInterval);
-    scoreInterval = setInterval(() => {
-        if (!gameOver && gameScreen.classList.contains("active")) {
-            score++;
-            scoreDisplay.textContent = "Score : " + score;
-            updateDifficulty();
-        }
-    }, currentPointDelay);
+function end(){
+    gameOver=true
+    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
+    data.push({name:player,score})
+    data.sort((a,b)=>b.score-a.score)
+    localStorage.setItem("leaderboard",JSON.stringify(data.slice(0,10)))
+    setTimeout(()=>switchScreen(home),1500)
 }
-
-/* ---------- Fin de partie ---------- */
-function endGame() {
-    message.innerHTML = "💥 GAME OVER 💥<br>Score : " + score;
-    message.style.display = "block";
-
-    const best = getBestScore();
-    if (score > best) setBestScore(score);
-
-    let leaderboard = getLeaderboard();
-    leaderboard.push({ name: currentPlayer, score: score });
-    leaderboard.sort((a, b) => b.score - a.score);
-    leaderboard = leaderboard.slice(0, 10);
-    setLeaderboard(leaderboard);
-
-    updateBestScoreDisplay();
-
-    setTimeout(() => {
-        showScreen(homeScreen);
-        message.style.display = "none";
-    }, 2000);
-}
-
-/* ---------- Lancement du jeu ---------- */
-function startGame() {
-    gameOver = false;
-    score = 0;
-    speed = baseSpeed;
-    speedMultiplier = 1;
-    spawnMultiplier = 1;
-    pointMultiplier = 1;
-    currentSpawnDelay = spawnBase;
-    currentPointDelay = pointInterval;
-    activatedThresholds.clear();
-
-    message.style.display = "none";
-    scoreDisplay.textContent = "Score : " + score;
-
-    rocketX = window.innerWidth / 2;
-    moveRocket();
-
-    document.querySelectorAll("#game-screen .rock").forEach(r => r.remove());
-    document.querySelectorAll("#game-screen .star").forEach(s => s.remove());
-
-    spawnStarsInGame();
-
-    clearInterval(moveInterval);
-    moveInterval = setInterval(moveRocket, 20);
-
-    restartScoreLoop();
-    spawnRock();
-}
-
-/* ---------- Contrôles ---------- */
-document.addEventListener("keydown", e => {
-    if (!gameScreen.classList.contains("active")) return;
-    if (e.key === "ArrowLeft") rocketX -= 30;
-    if (e.key === "ArrowRight") rocketX += 30;
-});
-
-document.getElementById("left").onclick = () => rocketX -= 30;
-document.getElementById("right").onclick = () => rocketX += 30;
-
-/* ---------- Boutons menu ---------- */
-playButton.addEventListener("click", () => {
-    currentPlayer = pseudoInput.value.trim() || "Anonyme";
-    showScreen(gameScreen);
-    startGame();
-});
-
-leaderboardButton.addEventListener("click", () => {
-    renderLeaderboard();
-    showScreen(leaderboardScreen);
-});
-
-backHome.addEventListener("click", () => {
-    showScreen(homeScreen);
-});
-
-/* ---------- Init ---------- */
-updateBestScoreDisplay();
 </script>
 
 </body>
