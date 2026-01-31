@@ -13,15 +13,6 @@
             text-align: center;
         }
 
-        /* Fond étoilé derrière tout */
-        #game-container {
-            position: fixed;
-            inset: 0;
-            overflow: hidden;
-            z-index: -10;
-            pointer-events: none; /* IMPORTANT : ne bloque plus les clics */
-        }
-
         .star {
             position: absolute;
             width: 2px;
@@ -29,20 +20,20 @@
             background: white;
             opacity: 0.8;
             border-radius: 50%;
+            pointer-events: none;
         }
 
-        /* Écrans */
         .screen {
             position: absolute;
             inset: 0;
             display: none;
+            z-index: 1;
         }
 
         .screen.active {
             display: block;
         }
 
-        /* Accueil */
         #home-screen {
             display: flex;
             flex-direction: column;
@@ -79,24 +70,23 @@
             box-shadow: 0 0 10px rgba(33,150,243,0.7);
         }
 
+        .menu-button:active {
+            transform: scale(0.97);
+        }
+
         #best-score-display {
             position: absolute;
             bottom: 20px;
             left: 20px;
             font-size: 18px;
+            text-align: left;
         }
 
-        /* Classement */
         #leaderboard-screen {
             display: flex;
             flex-direction: column;
             align-items: center;
             padding-top: 60px;
-        }
-
-        #leaderboard-title {
-            font-size: 36px;
-            margin-bottom: 20px;
         }
 
         #leaderboard-list {
@@ -119,7 +109,12 @@
             margin-right: 8px;
         }
 
-        /* Jeu */
+        #back-home {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+        }
+
         #game-screen {
             position: relative;
         }
@@ -212,9 +207,7 @@
 </head>
 <body>
 
-<div id="game-container"></div>
-
-<!-- ACCUEIL -->
+<!-- Accueil -->
 <div id="home-screen" class="screen active">
     <div id="title">FUSÉE INFINITY</div>
     <input id="pseudo-input" type="text" placeholder="Ton pseudo">
@@ -223,14 +216,13 @@
     <div id="best-score-display">Meilleur score : 0</div>
 </div>
 
-<!-- CLASSEMENT -->
+<!-- Classement -->
 <div id="leaderboard-screen" class="screen">
-    <div id="leaderboard-title">Top 10</div>
     <div id="leaderboard-list"></div>
     <button id="back-home" class="menu-button">Retour</button>
 </div>
 
-<!-- JEU -->
+<!-- Jeu -->
 <div id="game-screen" class="screen">
     <div id="score">Score : 0</div>
     <div id="message"></div>
@@ -246,8 +238,24 @@
 </div>
 
 <script>
-/* ---------- Variables globales ---------- */
-const gameContainer = document.getElementById("game-container");
+/* ---------- Fond étoilé simple ---------- */
+function spawnStars() {
+    for (let i = 0; i < 120; i++) {
+        let s = document.createElement("div");
+        s.classList.add("star");
+        s.style.left = Math.random() * window.innerWidth + "px";
+        s.style.top = Math.random() * window.innerHeight + "px";
+        document.body.appendChild(s);
+
+        setInterval(() => {
+            let top = parseInt(s.style.top);
+            s.style.top = (top + 2) % window.innerHeight + "px";
+        }, 60);
+    }
+}
+spawnStars();
+
+/* ---------- Sélecteurs ---------- */
 const homeScreen = document.getElementById("home-screen");
 const gameScreen = document.getElementById("game-screen");
 const leaderboardScreen = document.getElementById("leaderboard-screen");
@@ -256,9 +264,7 @@ const pseudoInput = document.getElementById("pseudo-input");
 const playButton = document.getElementById("play-button");
 const leaderboardButton = document.getElementById("leaderboard-button");
 const bestScoreDisplay = document.getElementById("best-score-display");
-
 const backHome = document.getElementById("back-home");
-
 const leaderboardList = document.getElementById("leaderboard-list");
 
 let rocket = document.getElementById("rocket");
@@ -273,23 +279,6 @@ let scoreInterval = null;
 let moveInterval = null;
 
 let currentPlayer = "";
-
-/* ---------- Fond étoilé ---------- */
-function spawnStars() {
-    for (let i = 0; i < 120; i++) {
-        let s = document.createElement("div");
-        s.classList.add("star");
-        s.style.left = Math.random() * window.innerWidth + "px";
-        s.style.top = Math.random() * window.innerHeight + "px";
-        gameContainer.appendChild(s);
-
-        setInterval(() => {
-            let top = parseInt(s.style.top);
-            s.style.top = (top + 2) % window.innerHeight + "px";
-        }, 60);
-    }
-}
-spawnStars();
 
 /* ---------- LocalStorage ---------- */
 function getBestScore() {
@@ -346,12 +335,12 @@ function renderLeaderboard() {
         const name = document.createElement("span");
         name.textContent = entry.name;
 
-        const score = document.createElement("span");
-        score.textContent = entry.score;
+        const scoreSpan = document.createElement("span");
+        scoreSpan.textContent = entry.score;
 
         div.appendChild(medal);
         div.appendChild(name);
-        div.appendChild(score);
+        div.appendChild(scoreSpan);
 
         leaderboardList.appendChild(div);
     });
@@ -368,8 +357,7 @@ function moveRocket() {
     rocket.style.left = rocketX + "px";
 }
 
-/* ---------- DIFFICULTÉ EXPONENTIELLE ---------- */
-
+/* ---------- Difficulté exponentielle ---------- */
 let baseSpeed = 4;
 let speedMultiplier = 1;
 let spawnBase = 800;
@@ -379,6 +367,10 @@ let pointMultiplier = 1;
 
 const fixedThresholds = [100, 250, 500, 1000, 1500];
 let activatedThresholds = new Set();
+
+let speed = baseSpeed;
+let currentSpawnDelay = spawnBase;
+let currentPointDelay = pointInterval;
 
 function updateDifficulty() {
     let thresholds = [...fixedThresholds];
@@ -408,9 +400,6 @@ function updateDifficulty() {
 }
 
 /* ---------- Astéroïdes ---------- */
-let speed = baseSpeed;
-let currentSpawnDelay = spawnBase;
-
 function spawnRock() {
     if (gameOver) return;
 
@@ -457,8 +446,6 @@ function spawnRock() {
 }
 
 /* ---------- Score exponentiel ---------- */
-let currentPointDelay = pointInterval;
-
 function restartScoreLoop() {
     clearInterval(scoreInterval);
     scoreInterval = setInterval(() => {
@@ -488,6 +475,7 @@ function endGame() {
 
     setTimeout(() => {
         showScreen(homeScreen);
+        message.style.display = "none";
     }, 2000);
 }
 
