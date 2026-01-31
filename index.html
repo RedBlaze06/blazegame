@@ -9,7 +9,7 @@ body{margin:0;background:black;color:white;font-family:Arial;overflow:hidden}
 .screen{position:absolute;inset:0;display:none}
 .active{display:flex}
 
-/* ACCUEIL */
+/* ===== ACCUEIL ===== */
 #home-screen{
     background:url("rocket-bg.jpg") center/cover;
     flex-direction:column;
@@ -27,35 +27,51 @@ input,button{
 button{background:#2196f3;color:white;cursor:pointer}
 #best{position:absolute;bottom:20px;left:20px}
 
-/* JEU */
-#game-screen{background:black;overflow:hidden}
-.star{
-    position:absolute;width:2px;height:2px;background:white;opacity:.8;
+/* ===== CLASSEMENT ===== */
+#leaderboard-screen{
+    background:linear-gradient(180deg,#0f2027,#203a43,#2c5364);
+    flex-direction:column;
+    align-items:center;
+    padding-top:30px;
+    gap:15px;
 }
+#leader-title{font-size:36px;text-shadow:0 0 10px gold}
+#leader-sub{opacity:.8}
+#leaderboard-list{width:320px}
+.item{
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    margin:6px 0;
+    border-radius:12px;
+}
+.gold{background:linear-gradient(90deg,#ffd700,#ffb300);color:black}
+.silver{background:linear-gradient(90deg,#cfd8dc,#b0bec5);color:black}
+.bronze{background:linear-gradient(90deg,#cd7f32,#a97142);color:black}
+.normal{background:rgba(255,255,255,.15)}
+.empty{border:2px dashed rgba(255,255,255,.3);opacity:.5}
 
-/* FUSÉE STYLÉE */
+/* ===== JEU ===== */
+#game-screen{background:black;overflow:hidden}
+.star{position:absolute;width:2px;height:2px;background:white;opacity:.8}
+
+/* Fusée stylée */
 .rocket{
     position:absolute;
     bottom:60px;
     left:50%;
     transform:translateX(-50%);
-    width:40px;
-    height:80px;
+    width:40px;height:80px;
     z-index:3;
 }
-.body{
-    width:40px;height:60px;
-    background:#d32f2f;
-    border-radius:10px;
-}
+.body{width:40px;height:55px;background:#d32f2f;border-radius:10px}
 .nose{
     width:0;height:0;
     border-left:20px solid transparent;
     border-right:20px solid transparent;
     border-bottom:25px solid #b71c1c;
-    margin:auto;
 }
-.wing.left,.wing.right{
+.wing{
     position:absolute;
     width:20px;height:20px;
     background:#ff9800;
@@ -64,17 +80,13 @@ button{background:#2196f3;color:white;cursor:pointer}
 .wing.left{left:-18px;clip-path:polygon(100% 0,0 50%,100% 100%)}
 .wing.right{right:-18px;clip-path:polygon(0 0,100% 50%,0 100%)}
 .flame{
-    width:12px;height:20px;
+    width:12px;height:18px;
     background:orange;
     margin:auto;
     animation:flame .2s infinite alternate;
 }
-@keyframes flame{
-    from{height:15px;background:orange}
-    to{height:22px;background:yellow}
-}
+@keyframes flame{from{height:14px}to{height:22px;background:yellow}}
 
-/* ROCHERS */
 .rock{
     position:absolute;
     width:50px;height:50px;
@@ -82,8 +94,6 @@ button{background:#2196f3;color:white;cursor:pointer}
     border-radius:50%;
     z-index:2;
 }
-
-/* HUD */
 #score{position:absolute;top:10px;left:10px;font-size:22px;z-index:5}
 
 /* GAME OVER */
@@ -95,10 +105,9 @@ button{background:#2196f3;color:white;cursor:pointer}
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    z-index:10;
     gap:20px;
+    z-index:10;
 }
-#gameover h1{font-size:36px}
 </style>
 </head>
 
@@ -111,6 +120,14 @@ button{background:#2196f3;color:white;cursor:pointer}
     <button onclick="play()">Jouer</button>
     <button onclick="showLeaderboard()">Classement</button>
     <div id="best">Meilleur score : 0</div>
+</div>
+
+<!-- CLASSEMENT -->
+<div id="leaderboard-screen" class="screen">
+    <div id="leader-title">🏆 CLASSEMENT</div>
+    <div id="leader-sub">TOP 1 → TOP 10</div>
+    <div id="leaderboard-list"></div>
+    <button onclick="goHome()">Retour</button>
 </div>
 
 <!-- JEU -->
@@ -135,22 +152,19 @@ button{background:#2196f3;color:white;cursor:pointer}
 <script>
 const home=document.getElementById("home-screen")
 const game=document.getElementById("game-screen")
+const leader=document.getElementById("leaderboard-screen")
 const rocket=document.getElementById("rocket")
 const scoreTxt=document.getElementById("score")
 const bestTxt=document.getElementById("best")
+const list=document.getElementById("leaderboard-list")
 const gameover=document.getElementById("gameover")
 const finalScore=document.getElementById("finalScore")
 const pseudoInput=document.getElementById("pseudo")
 
-let x=innerWidth/2
-let score=0
-let speed=4
-let spawnDelay=800
-let gameOver=false
-let player=""
+let x=innerWidth/2,score=0,speed=4,spawnDelay=800,gameOver=false,player=""
 
 function switchScreen(s){
-    [home,game].forEach(e=>e.classList.remove("active"))
+    [home,game,leader].forEach(e=>e.classList.remove("active"))
     s.classList.add("active")
 }
 
@@ -175,6 +189,7 @@ function spawnStars(){
     }
 }
 
+/* JOUER */
 function play(){
     player=pseudoInput.value||"Anonyme"
     score=0;speed=4;spawnDelay=800;gameOver=false
@@ -185,6 +200,27 @@ function play(){
     switchScreen(game)
     loopScore()
     spawnRock()
+}
+
+/* CLASSEMENT */
+function showLeaderboard(){
+    list.innerHTML=""
+    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
+
+    for(let i=0;i<10;i++){
+        let d=document.createElement("div")
+        if(data[i]){
+            let cls=i==0?"gold":i==1?"silver":i==2?"bronze":"normal"
+            let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":"#"+(i+1)
+            d.className="item "+cls
+            d.innerHTML=`<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`
+        }else{
+            d.className="item empty"
+            d.innerHTML=`<span>#${i+1} — Libre</span><span>—</span>`
+        }
+        list.appendChild(d)
+    }
+    switchScreen(leader)
 }
 
 /* CONTROLES */
@@ -217,16 +253,12 @@ function spawnRock(){
         if(gameOver){clearInterval(fall);return}
         let t=parseInt(r.style.top)
         r.style.top=t+speed+"px"
-
-        let a=r.getBoundingClientRect()
-        let b=rocket.getBoundingClientRect()
+        let a=r.getBoundingClientRect(),b=rocket.getBoundingClientRect()
         if(a.bottom>b.top && a.top<b.bottom && a.left<b.right && a.right>b.left){
-            endGame()
-            clearInterval(fall)
+            endGame();clearInterval(fall)
         }
         if(t>innerHeight){r.remove();clearInterval(fall)}
     },20)
-
     setTimeout(spawnRock,spawnDelay)
 }
 
@@ -237,6 +269,12 @@ function endGame(){
 
     let best=localStorage.getItem("bestScore")||0
     if(score>best)localStorage.setItem("bestScore",score)
+
+    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
+    data.push({name:player,score})
+    data.sort((a,b)=>b.score-a.score)
+    localStorage.setItem("leaderboard",JSON.stringify(data.slice(0,10)))
+
     updateBest()
 }
 
