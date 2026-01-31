@@ -7,17 +7,23 @@
         body {margin:0;overflow:hidden;background:black;font-family:Arial,sans-serif;color:white;text-align:center;}
         .screen{position:absolute;inset:0;display:none;}
         .screen.active{display:block;}
-        #home-screen,#leaderboard-screen{background:#0b0b0b;}
-        #home-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;}
+
+        /* Accueil */
+        #home-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:#0b0b0b;}
         #title{font-size:48px;letter-spacing:4px;text-shadow:0 0 10px #fff;margin-bottom:20px;}
         #pseudo-input{padding:10px 15px;font-size:18px;border-radius:8px;border:none;outline:none;width:220px;text-align:center;}
         .menu-button{padding:12px 25px;font-size:20px;border-radius:10px;border:none;cursor:pointer;background:#2196f3;color:white;box-shadow:0 0 10px rgba(33,150,243,0.7);}
         .menu-button:active{transform:scale(0.97);}
         #best-score-display{position:absolute;bottom:20px;left:20px;font-size:18px;text-align:left;}
+
+        /* Classement */
         #leaderboard-screen{display:flex;flex-direction:column;align-items:center;padding-top:60px;background:linear-gradient(45deg,#222,#444);}
-        #leaderboard-title{font-size:36px;margin-bottom:20px;color:#ffd700;}
+        #leaderboard-title{font-size:36px;margin-bottom:20px;color:#ffd700;letter-spacing:2px;}
         #leaderboard-list{width:90%;max-width:400px;text-align:left;}
-        .leaderboard-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin-bottom:6px;background:rgba(255,255,255,0.1);border-radius:8px;color:white;}
+        .leaderboard-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin-bottom:6px;border-radius:8px;color:white;background:rgba(255,255,255,0.1);}
+        .empty-slot{background:rgba(255,255,255,0.02);color:#888;font-style:italic;}
+
+        /* Jeu */
         #game-screen{position:relative;background:black;overflow:hidden;}
         .star{position:absolute;width:2px;height:2px;background:white;opacity:0.8;border-radius:50%;pointer-events:none;z-index:0;}
         .rocket{position:absolute;bottom:50px;left:50%;transform:translateX(-50%);width:40px;height:80px;z-index:2;}
@@ -26,8 +32,8 @@
         .rocket-flame{position:absolute;bottom:-20px;left:5px;width:30px;height:20px;background:#ff9800;clip-path:polygon(50% 0%,0% 100%,100% 100%);}
         .wing-right{position:absolute;bottom:10px;right:-15px;width:20px;height:40px;background:#ff9800;clip-path:polygon(0% 100%,100% 50%,0% 0%);}
         .rock{position:absolute;width:50px;height:50px;background:#777;border-radius:50%;box-shadow:inset -5px -5px 10px #555;z-index:1;}
-        #score{position:absolute;top:10px;left:10px;font-size:24px;z-index:3;}
-        #message{position:absolute;top:35%;width:100%;font-size:32px;display:none;z-index:3;color:#ffd700;}
+        #score{position:absolute;top:10px;left:10px;font-size:24px;z-index:3;color:#ffd700;}
+        #message{position:absolute;top:35%;width:100%;font-size:32px;display:none;z-index:3;color:#ff4444;}
         #game-over-btn{padding:12px 20px;font-size:20px;border:none;border-radius:10px;background:#2196f3;color:white;cursor:pointer;margin-top:20px;display:none;}
         #controls{position:absolute;bottom:20px;width:100%;display:flex;justify-content:space-around;z-index:3;}
         .btn{width:120px;height:120px;background:rgba(255,255,255,0.2);border-radius:20px;font-size:40px;line-height:120px;user-select:none;}
@@ -106,10 +112,8 @@ let gameOverBtn = document.getElementById("game-over-btn");
 let rocketX = window.innerWidth / 2;
 let score = 0;
 let gameOver = false;
-
 let scoreInterval = null;
 let moveInterval = null;
-
 let currentPlayer = "";
 
 /* ---------- Fond étoilé ---------- */
@@ -130,9 +134,7 @@ function spawnStarsInGame() {
 }
 
 /* ---------- LocalStorage ---------- */
-function getBestScore() {
-    return parseInt(localStorage.getItem("bestScore")||"0",10);
-}
+function getBestScore() { return parseInt(localStorage.getItem("bestScore")||"0",10); }
 function setBestScore(value) { localStorage.setItem("bestScore",value.toString()); }
 function updateBestScoreDisplay() { bestScoreDisplay.textContent="Meilleur score : "+getBestScore(); }
 
@@ -160,6 +162,7 @@ async function renderLeaderboard(){
         let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":i+1+".";
         let div=document.createElement("div");
         div.className="leaderboard-item";
+        if(entry.name==="---") div.classList.add("empty-slot");
         div.innerHTML=`<span>${medal} ${entry.name}</span><span>${entry.score}</span>`;
         leaderboardList.appendChild(div);
     }
@@ -169,11 +172,10 @@ async function renderLeaderboard(){
 function clampRocket(){ if(rocketX<20)rocketX=20;if(rocketX>window.innerWidth-60)rocketX=window.innerWidth-60; }
 function moveRocket(){ clampRocket(); rocket.style.left=rocketX+"px"; }
 
-/* ---------- Difficulté exponentielle ---------- */
-let baseSpeed=4,speedMultiplier=1,spawnBase=800,spawnMultiplier=1,pointInterval=400,pointMultiplier=1;
-let fixedThresholds=[100,250,500,1000,1500];
-let activatedThresholds=new Set();
-let speed=baseSpeed,currentSpawnDelay=spawnBase,currentPointDelay=pointInterval;
+/* ---------- Astéroïdes ---------- */
+let baseSpeed=4, speedMultiplier=1, spawnBase=800, spawnMultiplier=1, pointInterval=400, pointMultiplier=1;
+let fixedThresholds=[100,250,500,1000,1500], activatedThresholds=new Set();
+let speed=baseSpeed, currentSpawnDelay=spawnBase, currentPointDelay=pointInterval;
 
 function updateDifficulty(){
     let thresholds=[...fixedThresholds];
@@ -190,7 +192,6 @@ function updateDifficulty(){
     });
 }
 
-/* ---------- Astéroïdes ---------- */
 function spawnRock(){
     if(gameOver)return;
     let rock=document.createElement("div");
@@ -205,18 +206,14 @@ function spawnRock(){
         let r=rock.getBoundingClientRect();
         let f=rocket.getBoundingClientRect();
         if(r.left<f.right&&r.right>f.left&&r.top<f.bottom&&r.bottom>f.top){
-            gameOver=true;
-            endGame();
-            clearInterval(fall);
-            rock.remove();
-            return;
+            gameOver=true; endGame(); clearInterval(fall); rock.remove(); return;
         }
         if(top>window.innerHeight){ rock.remove(); clearInterval(fall);}
     },20);
     setTimeout(spawnRock,currentSpawnDelay);
 }
 
-/* ---------- Score exponentiel ---------- */
+/* ---------- Score ---------- */
 function restartScoreLoop(){
     clearInterval(scoreInterval);
     scoreInterval=setInterval(()=>{
@@ -238,7 +235,6 @@ function endGame(){
     if(score>best)setBestScore(score);
 
     saveScoreOnline(currentPlayer,score);
-
     updateBestScoreDisplay();
 }
 
