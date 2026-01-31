@@ -2,9 +2,9 @@
 <html>
 <head>
     <title>Fusée Infinity</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body {margin:0;overflow:hidden;background:black;font-family:Arial,sans-serif;color:white;text-align:center;}
+        body{margin:0;overflow:hidden;background:black;font-family:Arial,sans-serif;color:white;text-align:center;}
         .screen{position:absolute;inset:0;display:none;}
         .screen.active{display:block;}
 
@@ -174,12 +174,11 @@ function moveRocket(){ clampRocket(); rocket.style.left=rocketX+"px"; }
 
 /* ---------- Astéroïdes ---------- */
 let baseSpeed=4, speedMultiplier=1, spawnBase=800, spawnMultiplier=1, pointInterval=400, pointMultiplier=1;
-let fixedThresholds=[100,250,500,1000,1500], activatedThresholds=new Set();
+let activatedThresholds=new Set();
 let speed=baseSpeed, currentSpawnDelay=spawnBase, currentPointDelay=pointInterval;
 
 function updateDifficulty(){
-    let thresholds=[...fixedThresholds];
-    if(score>=1500){ let extra=Math.floor((score-1500)/500); for(let i=0;i<=extra;i++) thresholds.push(1500+i*500);}
+    let thresholds=[100,250,500,1000,1500];
     thresholds.forEach(t=>{
         if(score>=t&&!activatedThresholds.has(t)){
             activatedThresholds.add(t);
