@@ -25,67 +25,56 @@ input,button{
     border:none;
 }
 button{background:#2196f3;color:white;cursor:pointer}
-#best{
-    position:absolute;
-    bottom:20px;
-    left:20px;
-    font-size:18px;
-}
-
-/* ===== CLASSEMENT ===== */
-#leaderboard-screen{
-    background:linear-gradient(180deg,#0f2027,#203a43,#2c5364);
-    flex-direction:column;
-    align-items:center;
-    padding-top:30px;
-}
-#leader-title{
-    font-size:36px;
-    margin-bottom:5px;
-    text-shadow:0 0 10px gold;
-}
-#leader-sub{
-    font-size:18px;
-    opacity:.8;
-    margin-bottom:20px;
-}
-#leaderboard-list{
-    width:320px;
-}
-.item{
-    display:flex;
-    justify-content:space-between;
-    padding:10px;
-    margin:8px 0;
-    border-radius:12px;
-    font-size:18px;
-}
-.gold{background:linear-gradient(90deg,#ffd700,#ffb300);color:black}
-.silver{background:linear-gradient(90deg,#cfd8dc,#b0bec5);color:black}
-.bronze{background:linear-gradient(90deg,#cd7f32,#a97142);color:black}
-.normal{background:rgba(255,255,255,.15)}
-.empty{
-    border:2px dashed rgba(255,255,255,.3);
-    color:rgba(255,255,255,.5);
-}
+#best{position:absolute;bottom:20px;left:20px}
 
 /* JEU */
 #game-screen{background:black;overflow:hidden}
 .star{
-    position:absolute;
-    width:2px;height:2px;
-    background:white;
-    opacity:.8;
+    position:absolute;width:2px;height:2px;background:white;opacity:.8;
 }
+
+/* FUSÉE STYLÉE */
 .rocket{
     position:absolute;
-    bottom:40px;
-    width:40px;height:80px;
-    background:red;
+    bottom:60px;
     left:50%;
     transform:translateX(-50%);
-    z-index:2;
+    width:40px;
+    height:80px;
+    z-index:3;
 }
+.body{
+    width:40px;height:60px;
+    background:#d32f2f;
+    border-radius:10px;
+}
+.nose{
+    width:0;height:0;
+    border-left:20px solid transparent;
+    border-right:20px solid transparent;
+    border-bottom:25px solid #b71c1c;
+    margin:auto;
+}
+.wing.left,.wing.right{
+    position:absolute;
+    width:20px;height:20px;
+    background:#ff9800;
+    bottom:15px;
+}
+.wing.left{left:-18px;clip-path:polygon(100% 0,0 50%,100% 100%)}
+.wing.right{right:-18px;clip-path:polygon(0 0,100% 50%,0 100%)}
+.flame{
+    width:12px;height:20px;
+    background:orange;
+    margin:auto;
+    animation:flame .2s infinite alternate;
+}
+@keyframes flame{
+    from{height:15px;background:orange}
+    to{height:22px;background:yellow}
+}
+
+/* ROCHERS */
 .rock{
     position:absolute;
     width:50px;height:50px;
@@ -93,7 +82,23 @@ button{background:#2196f3;color:white;cursor:pointer}
     border-radius:50%;
     z-index:2;
 }
-#score{position:absolute;top:10px;left:10px;font-size:22px;z-index:3}
+
+/* HUD */
+#score{position:absolute;top:10px;left:10px;font-size:22px;z-index:5}
+
+/* GAME OVER */
+#gameover{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.85);
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    z-index:10;
+    gap:20px;
+}
+#gameover h1{font-size:36px}
 </style>
 </head>
 
@@ -108,33 +113,44 @@ button{background:#2196f3;color:white;cursor:pointer}
     <div id="best">Meilleur score : 0</div>
 </div>
 
-<!-- CLASSEMENT -->
-<div id="leaderboard-screen" class="screen">
-    <div id="leader-title">🏆 CLASSEMENT</div>
-    <div id="leader-sub">TOP 1 → TOP 10</div>
-    <div id="leaderboard-list"></div>
-</div>
-
 <!-- JEU -->
 <div id="game-screen" class="screen">
     <div id="score">Score : 0</div>
-    <div class="rocket" id="rocket"></div>
+
+    <div class="rocket" id="rocket">
+        <div class="nose"></div>
+        <div class="body"></div>
+        <div class="wing left"></div>
+        <div class="wing right"></div>
+        <div class="flame"></div>
+    </div>
+
+    <div id="gameover">
+        <h1>💥 VOUS AVEZ PERDU 💥</h1>
+        <div id="finalScore"></div>
+        <button onclick="goHome()">Retour</button>
+    </div>
 </div>
 
 <script>
 const home=document.getElementById("home-screen")
 const game=document.getElementById("game-screen")
-const leader=document.getElementById("leaderboard-screen")
 const rocket=document.getElementById("rocket")
 const scoreTxt=document.getElementById("score")
-const list=document.getElementById("leaderboard-list")
-const pseudoInput=document.getElementById("pseudo")
 const bestTxt=document.getElementById("best")
+const gameover=document.getElementById("gameover")
+const finalScore=document.getElementById("finalScore")
+const pseudoInput=document.getElementById("pseudo")
 
-let x=innerWidth/2,score=0,speed=4,spawnDelay=800,gameOver=false,player=""
+let x=innerWidth/2
+let score=0
+let speed=4
+let spawnDelay=800
+let gameOver=false
+let player=""
 
 function switchScreen(s){
-    [home,game,leader].forEach(e=>e.classList.remove("active"))
+    [home,game].forEach(e=>e.classList.remove("active"))
     s.classList.add("active")
 }
 
@@ -153,7 +169,7 @@ function spawnStars(){
         s.style.top=Math.random()*innerHeight+"px"
         game.appendChild(s)
         setInterval(()=>{
-            if(!game.classList.contains("active"))return
+            if(gameOver)return
             s.style.top=(parseInt(s.style.top)+2)%innerHeight+"px"
         },60)
     }
@@ -163,6 +179,7 @@ function play(){
     player=pseudoInput.value||"Anonyme"
     score=0;speed=4;spawnDelay=800;gameOver=false
     scoreTxt.textContent="Score : 0"
+    gameover.style.display="none"
     document.querySelectorAll(".rock").forEach(r=>r.remove())
     spawnStars()
     switchScreen(game)
@@ -170,31 +187,9 @@ function play(){
     spawnRock()
 }
 
-function showLeaderboard(){
-    list.innerHTML=""
-    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
-
-    for(let i=0;i<10;i++){
-        let d=document.createElement("div")
-        if(data[i]){
-            let cls=i==0?"gold":i==1?"silver":i==2?"bronze":"normal"
-            let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":`#${i+1}`
-            d.className="item "+cls
-            d.innerHTML=`<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`
-        }else{
-            d.className="item empty"
-            d.innerHTML=`<span>#${i+1} — Libre</span><span>—</span>`
-        }
-        list.appendChild(d)
-    }
-    switchScreen(leader)
-}
-
-leader.onclick=()=>switchScreen(home)
-
 /* CONTROLES */
 document.addEventListener("keydown",e=>{
-    if(!game.classList.contains("active"))return
+    if(gameOver||!game.classList.contains("active"))return
     if(e.key==="ArrowLeft")x-=30
     if(e.key==="ArrowRight")x+=30
     x=Math.max(0,Math.min(innerWidth-40,x))
@@ -204,8 +199,9 @@ document.addEventListener("keydown",e=>{
 function loopScore(){
     let i=setInterval(()=>{
         if(gameOver)return clearInterval(i)
-        score++;scoreTxt.textContent="Score : "+score
-        if(score>=500){speed*=1.01;spawnDelay=Math.max(200,spawnDelay*0.99)}
+        score++
+        scoreTxt.textContent="Score : "+score
+        if(score>=500){speed*=1.01;spawnDelay=Math.max(200,spawnDelay*.99)}
     },200)
 }
 
@@ -218,28 +214,36 @@ function spawnRock(){
     game.appendChild(r)
 
     let fall=setInterval(()=>{
+        if(gameOver){clearInterval(fall);return}
         let t=parseInt(r.style.top)
         r.style.top=t+speed+"px"
-        let a=r.getBoundingClientRect(),b=rocket.getBoundingClientRect()
+
+        let a=r.getBoundingClientRect()
+        let b=rocket.getBoundingClientRect()
         if(a.bottom>b.top && a.top<b.bottom && a.left<b.right && a.right>b.left){
-            end();clearInterval(fall)
+            endGame()
+            clearInterval(fall)
         }
         if(t>innerHeight){r.remove();clearInterval(fall)}
     },20)
+
     setTimeout(spawnRock,spawnDelay)
 }
 
-function end(){
+function endGame(){
     gameOver=true
+    finalScore.textContent="Score : "+score
+    gameover.style.display="flex"
+
     let best=localStorage.getItem("bestScore")||0
     if(score>best)localStorage.setItem("bestScore",score)
-    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
-    data.push({name:player,score})
-    data.sort((a,b)=>b.score-a.score)
-    localStorage.setItem("leaderboard",JSON.stringify(data.slice(0,10)))
     updateBest()
-    setTimeout(()=>switchScreen(home),1500)
+}
+
+function goHome(){
+    switchScreen(home)
 }
 </script>
+
 </body>
 </html>
