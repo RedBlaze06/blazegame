@@ -253,46 +253,44 @@ function loopScore(){
 }
 
 /* ===== FIREBASE - CLASSEMENT ===== */
-function sendScoreToFirebase(player, score) {
+async function sendScoreToFirebase(player, score) {
     const scoresRef = database.ref('scores');
-    scoresRef.push({
+    await scoresRef.push({
       name: player,
       score: score,
       date: Date.now()
     });
 }
 
-function getTop10FromFirebase(callback) {
+async function getTop10FromFirebase() {
     const scoresRef = database.ref('scores');
-    scoresRef.orderByChild('score').limitToLast(10).once('value', (snapshot) => {
-        const scores = [];
-        snapshot.forEach((child) => {
-            scores.push(child.val());
-        });
-        scores.sort((a,b)=>b.score-a.score);
-        callback(scores);
-    });
+    const snapshot = await scoresRef.orderByChild('score').limitToLast(10).once('value');
+    const scores = [];
+    snapshot.forEach(child => scores.push(child.val()));
+    scores.sort((a,b)=>b.score - a.score);
+    return scores;
 }
 
-function showLeaderboard(){
-    list.innerHTML=""
-    getTop10FromFirebase((data) => {
-        for(let i=0;i<10;i++){
-            let d=document.createElement("div")
-            if(data[i]){
-                let cls=i==0?"gold":i==1?"silver":i==2?"bronze":"normal"
-                let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":"#"+(i+1)
-                d.className="item "+cls
-                d.innerHTML=`<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`
-            }else{
-                d.className="item empty"
-                d.innerHTML=`<span>#${i+1} — Libre</span><span>—</span>`
-            }
-            list.appendChild(d)
+async function showLeaderboard(){
+    list.innerHTML = "";
+
+    const data = await getTop10FromFirebase();
+
+    for(let i=0;i<10;i++){
+        let d=document.createElement("div")
+        if(data[i]){
+            let cls=i==0?"gold":i==1?"silver":i==2?"bronze":"normal"
+            let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":"#"+(i+1)
+            d.className="item "+cls
+            d.innerHTML=`<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`
+        }else{
+            d.className="item empty"
+            d.innerHTML=`<span>#${i+1} — Libre</span><span>—</span>`
         }
-        // SWITCH SCREEN après récupération Firebase
-        switchScreen(leader)
-    })
+        list.appendChild(d)
+    }
+
+    switchScreen(leader)
 }
 
 /* CONTROLES */
@@ -325,7 +323,7 @@ function spawnRock(){
     setTimeout(spawnRock,spawnDelay)
 }
 
-function endGame(){
+async function endGame(){
     gameOver=true
     finalScore.textContent="Score : "+score
     gameover.style.display="flex"
@@ -333,7 +331,7 @@ function endGame(){
     let best=localStorage.getItem("bestScore")||0
     if(score>best)localStorage.setItem("bestScore",score)
 
-    sendScoreToFirebase(player, score)
+    await sendScoreToFirebase(player, score)
     updateBest()
 }
 
