@@ -3,124 +3,122 @@
 <head>
 <meta charset="UTF-8">
 <title>Fusée Infinity</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <style>
-body{margin:0;background:black;color:white;font-family:Arial, sans-serif;overflow:hidden;touch-action:none}
-.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px}
+*{box-sizing:border-box}
+body{
+    margin:0;
+    background:black;
+    color:white;
+    font-family:Arial,sans-serif;
+    overflow:hidden;
+    touch-action:none;
+}
+.screen{
+    position:absolute;
+    inset:0;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:20px
+}
 .active{display:flex}
 
-/* ===== ACCUEIL ===== */
+/* ACCUEIL */
 #home-screen{
-    background:url("https://images.unsplash.com/photo-1615037498325-3f7f6b2ed7f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5NzIyOXwwfDF8c2VhcmNofDF8fHJvY2tldCUyMGRlcGFydHxlbnwwfHx8fDE2ODg1MDgyNzY&ixlib=rb-4.0.3&q=80&w=1080") center/cover no-repeat;
+    background:
+    linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.2)),
+    url("https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1600&q=80")
+    center/cover no-repeat;
 }
-#title{font-size:42px;text-shadow:0 0 10px white}
+#title{font-size:42px;text-shadow:0 0 15px white}
 input,button{
     padding:12px 20px;
     font-size:18px;
     border-radius:10px;
-    border:none;
+    border:none
 }
 button{background:#2196f3;color:white;cursor:pointer}
 #best{position:absolute;bottom:20px;left:20px}
 
-/* ===== CLASSEMENT ===== */
+/* CLASSEMENT */
 #leaderboard-screen{
     background:linear-gradient(180deg,#0f2027,#203a43,#2c5364);
-    flex-direction:column;
-    align-items:center;
     padding-top:30px;
-    gap:15px;
+    gap:10px;
+    flex-direction:column;
 }
-#leader-title{font-size:36px;text-shadow:0 0 10px gold}
-#leader-sub{opacity:.8}
 #leaderboard-list{width:320px}
-.item{
-    display:flex;
-    justify-content:space-between;
-    padding:10px;
-    margin:6px 0;
-    border-radius:12px;
-}
+.item{display:flex;justify-content:space-between;padding:10px;margin:6px 0;border-radius:12px}
 .gold{background:linear-gradient(90deg,#ffd700,#ffb300);color:black}
 .silver{background:linear-gradient(90deg,#cfd8dc,#b0bec5);color:black}
 .bronze{background:linear-gradient(90deg,#cd7f32,#a97142);color:black}
 .normal{background:rgba(255,255,255,.15)}
 .empty{border:2px dashed rgba(255,255,255,.3);opacity:.5}
 
-/* ===== JEU ===== */
+/* JEU */
 #game-screen{background:black;overflow:hidden}
-.star{position:absolute;width:2px;height:2px;background:white;opacity:.8;}
+.star{position:absolute;width:2px;height:2px;background:white;opacity:.8;pointer-events:none}
 
-/* Fusée stylée */
 .rocket{
     position:absolute;
     bottom:60px;
-    left:50%;
-    transform:translateX(-50%);
     width:40px;height:80px;
-    z-index:3;
 }
-.body{width:40px;height:55px;background:#d32f2f;border-radius:10px;position:relative;top:0;}
 .nose{
     width:0;height:0;
     border-left:20px solid transparent;
     border-right:20px solid transparent;
     border-bottom:25px solid #b71c1c;
 }
-.wing{
-    position:absolute;
-    width:20px;height:20px;
-    background:#ff9800;
-    bottom:15px;
-}
-.wing.left{left:-18px;clip-path:polygon(100% 0,0 50%,100% 100%)}
-.wing.right{right:-18px;clip-path:polygon(0 0,100% 50%,0 100%)}
+.body{width:40px;height:55px;background:#d32f2f;border-radius:10px}
+.wing{position:absolute;width:20px;height:20px;background:#ff9800;bottom:15px}
+.wing.left{left:-18px}
+.wing.right{right:-18px}
 .flame{
-    position:absolute;
     width:12px;height:18px;
     background:orange;
-    bottom:-18px;
-    left:50%;
-    transform:translateX(-50%);
+    margin:0 auto;
     animation:flame .2s infinite alternate;
 }
 @keyframes flame{from{height:14px}to{height:22px;background:yellow}}
 
-.rock{
-    position:absolute;
-    width:50px;height:50px;
-    background:gray;
-    border-radius:50%;
-    z-index:2;
-}
-#score{position:absolute;top:10px;left:10px;font-size:22px;z-index:5}
-
-/* BUTTONS MOBILE */
-.mobile-btns{
-    position:absolute;bottom:20px;width:100%;display:flex;justify-content:space-between;padding:0 40px;z-index:5;
-}
-.mobile-btns button{
-    padding:20px 30px;font-size:24px;border-radius:10px;background:#2196f3;color:white;
-}
+.rock{position:absolute;width:50px;height:50px;background:gray;border-radius:50%}
+#score{position:absolute;top:10px;left:10px;font-size:22px}
 
 /* GAME OVER */
 #gameover{
-    position:absolute;
-    inset:0;
+    position:absolute;inset:0;
     background:rgba(0,0,0,.85);
     display:none;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:20px;
-    z-index:10;
+}
+
+/* CONTROLES MOBILE */
+#mobile-controls{
+    position:absolute;
+    bottom:20px;
+    left:0;right:0;
+    display:flex;
+    justify-content:space-between;
+    padding:0 20px;
+}
+#mobile-controls button{
+    width:80px;height:80px;
+    font-size:32px;
+    border-radius:50%;
+    background:rgba(255,255,255,.2);
+    color:white;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ACCUEIL -->
 <div id="home-screen" class="screen active">
     <div id="title">FUSÉE INFINITY</div>
     <input id="pseudo" placeholder="Ton pseudo">
@@ -129,15 +127,12 @@ button{background:#2196f3;color:white;cursor:pointer}
     <div id="best">Meilleur score : 0</div>
 </div>
 
-<!-- CLASSEMENT -->
 <div id="leaderboard-screen" class="screen">
-    <div id="leader-title">🏆 CLASSEMENT</div>
-    <div id="leader-sub">TOP 1 → TOP 10</div>
+    <h1>🏆 CLASSEMENT</h1>
     <div id="leaderboard-list"></div>
     <button onclick="goHome()">Retour</button>
 </div>
 
-<!-- JEU -->
 <div id="game-screen" class="screen">
     <div id="score">Score : 0</div>
 
@@ -149,7 +144,7 @@ button{background:#2196f3;color:white;cursor:pointer}
         <div class="flame"></div>
     </div>
 
-    <div class="mobile-btns">
+    <div id="mobile-controls">
         <button id="leftBtn">⬅️</button>
         <button id="rightBtn">➡️</button>
     </div>
@@ -172,27 +167,18 @@ const list=document.getElementById("leaderboard-list")
 const gameover=document.getElementById("gameover")
 const finalScore=document.getElementById("finalScore")
 const pseudoInput=document.getElementById("pseudo")
-const leftBtn=document.getElementById("leftBtn")
-const rightBtn=document.getElementById("rightBtn")
 
-let x=innerWidth/2-20, score=0, speed=4, spawnDelay=800, gameOver=false, player=""
-let baseSpeed=4, speedMultiplier=1, pointMultiplier=1, activatedThresholds = new Set(), scoreInterval
-let moveLeft=false, moveRight=false
+let x=innerWidth/2-20
+let score=0,baseSpeed=4,speed=4,spawnDelay=800
+let speedMultiplier=1,pointMultiplier=1
+let activatedThresholds=new Set()
+let gameOver=false
+let scoreInterval
 let stars=[]
-
-function switchScreen(s){
-    [home,game,leader].forEach(e=>e.classList.remove("active"))
-    s.classList.add("active")
-}
-
-function updateBest(){
-    bestTxt.textContent="Meilleur score : "+(localStorage.getItem("bestScore")||0)
-}
-updateBest()
 
 /* ÉTOILES */
 function spawnStars(){
-    document.querySelectorAll(".star").forEach(s=>s.remove())
+    stars.forEach(s=>s.remove())
     stars=[]
     for(let i=0;i<120;i++){
         let s=document.createElement("div")
@@ -203,73 +189,141 @@ function spawnStars(){
         stars.push(s)
     }
 }
-
 function moveStars(){
     stars.forEach(s=>{
         let t=parseFloat(s.style.top)
         t+=2
-        if(t>innerHeight)t=0
+        if(t>innerHeight) t=0
         s.style.top=t+"px"
     })
-    if(!gameOver)requestAnimationFrame(moveStars)
+    if(!gameOver) requestAnimationFrame(moveStars)
 }
 
-/* JOUER */
-function play(){
-    player = pseudoInput.value || "Anonyme";
-    score = 0;
-    baseSpeed = 4;
-    speedMultiplier = 1;
-    pointMultiplier = 1;
-    speed = baseSpeed;
-    spawnDelay = 800;
-    activatedThresholds = new Set();
-    gameOver = false;
-    x = innerWidth/2-20;
-    rocket.style.left = x+"px";
-    scoreTxt.textContent = "Score : 0";
-    gameover.style.display = "none";
-    document.querySelectorAll(".rock").forEach(r=>r.remove());
-    spawnStars();
-    moveStars();
-    switchScreen(game);
-    loopScore();
-    spawnRock();
-}
-
-/* SCORE EXPONENTIEL ET DIFFICULTÉ */
+/* EXPONENTIEL */
 function loopScore(){
-    clearInterval(scoreInterval);
-    scoreInterval = setInterval(()=>{
-        if(gameOver) return;
-        score += pointMultiplier;
-        scoreTxt.textContent = "Score : " + score;
+    clearInterval(scoreInterval)
+    scoreInterval=setInterval(()=>{
+        if(gameOver)return
+        score+=pointMultiplier
+        scoreTxt.textContent="Score : "+score
 
-        // Seuils exponentiels fixes
-        let thresholds = [100,250,500,1000];
+        let thresholds=[100,250,500,1000]
         if(score>=1500){
-            let extra=Math.floor((score-1500)/500);
-            for(let i=0;i<=extra;i++) thresholds.push(1500+i*500);
+            let extra=Math.floor((score-1500)/500)
+            for(let i=0;i<=extra;i++) thresholds.push(1500+i*500)
         }
 
         thresholds.forEach(t=>{
             if(score>=t && !activatedThresholds.has(t)){
                 activatedThresholds.add(t)
-                speedMultiplier=Math.pow(2,activatedThresholds.size)
-                pointMultiplier=Math.pow(2,activatedThresholds.size)
+                speedMultiplier*=2
+                pointMultiplier*=2
                 speed=baseSpeed*speedMultiplier
-                spawnDelay=Math.max(100,800/speedMultiplier)
+                spawnDelay=Math.max(120,800/speedMultiplier)
             }
         })
-
     },250)
+}
+
+/* CONTROLES FLUIDES */
+let leftPressed=false
+let rightPressed=false
+setInterval(()=>{
+    if(gameOver)return
+    if(leftPressed)x-=6
+    if(rightPressed)x+=6
+    x=Math.max(0,Math.min(innerWidth-40,x))
+    rocket.style.left=x+"px"
+},16)
+
+/* CLAVIER */
+document.addEventListener("keydown",e=>{
+    if(e.key==="ArrowLeft") leftPressed=true
+    if(e.key==="ArrowRight") rightPressed=true
+})
+document.addEventListener("keyup",e=>{
+    if(e.key==="ArrowLeft") leftPressed=false
+    if(e.key==="ArrowRight") rightPressed=false
+})
+
+/* MOBILE */
+const leftBtn=document.getElementById("leftBtn")
+const rightBtn=document.getElementById("rightBtn")
+;["touchstart","mousedown"].forEach(ev=>{
+    leftBtn.addEventListener(ev,e=>{e.preventDefault();leftPressed=true})
+    rightBtn.addEventListener(ev,e=>{e.preventDefault();rightPressed=true})
+})
+;["touchend","mouseup","mouseleave"].forEach(ev=>{
+    leftBtn.addEventListener(ev,()=>leftPressed=false)
+    rightBtn.addEventListener(ev,()=>rightPressed=false)
+})
+
+/* JEU */
+function play(){
+    score=0
+    speedMultiplier=1
+    pointMultiplier=1
+    activatedThresholds=new Set()
+    gameOver=false
+    x=innerWidth/2-20
+    rocket.style.left=x+"px"
+    scoreTxt.textContent="Score : 0"
+    gameover.style.display="none"
+    document.querySelectorAll(".rock").forEach(r=>r.remove())
+    spawnStars()
+    moveStars()
+    switchScreen(game)
+    loopScore()
+    spawnRock()
+}
+
+/* ROCKS */
+function spawnRock(){
+    if(gameOver)return
+    let r=document.createElement("div")
+    r.className="rock"
+    r.style.left=Math.random()*(innerWidth-50)+"px"
+    r.style.top="-60px"
+    game.appendChild(r)
+
+    let fall=setInterval(()=>{
+        if(gameOver){r.remove();clearInterval(fall);return}
+        r.style.top=parseInt(r.style.top)+speed+"px"
+        let a=r.getBoundingClientRect()
+        let b=rocket.getBoundingClientRect()
+        if(a.bottom>b.top && a.top<b.bottom && a.left<b.right && a.right>b.left){
+            r.remove()
+            clearInterval(fall)
+            endGame()
+        }
+        if(parseInt(r.style.top)>innerHeight){
+            r.remove();clearInterval(fall)
+        }
+    },20)
+    setTimeout(spawnRock,spawnDelay)
+}
+
+function endGame(){
+    gameOver=true
+    clearInterval(scoreInterval)
+    finalScore.textContent="Score : "+score
+
+    /* SCORE ET CLASSEMENT */
+    let best=localStorage.getItem("bestScore")||0
+    if(score>best) localStorage.setItem("bestScore",score)
+    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
+    data.push({name:pseudoInput.value||"Anonyme",score})
+    data.sort((a,b)=>b.score-a.score)
+    localStorage.setItem("leaderboard",JSON.stringify(data.slice(0,10)))
+
+    gameover.style.display="flex"
+    updateBest()
 }
 
 /* CLASSEMENT */
 function showLeaderboard(){
     list.innerHTML=""
     let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
-
     for(let i=0;i<10;i++){
         let d=document.createElement("div")
         if(data[i]){
@@ -286,73 +340,9 @@ function showLeaderboard(){
     switchScreen(leader)
 }
 
-/* CONTROLES */
-document.addEventListener("keydown",e=>{
-    if(gameOver||!game.classList.contains("active"))return
-    if(e.key==="ArrowLeft") moveLeft=true
-    if(e.key==="ArrowRight") moveRight=true
-})
-document.addEventListener("keyup",e=>{
-    if(e.key==="ArrowLeft") moveLeft=false
-    if(e.key==="ArrowRight") moveRight=false
-})
-
-function moveRocket(){
-    if(gameOver) return
-    if(moveLeft)x-=30
-    if(moveRight)x+=30
-    x=Math.max(0,Math.min(innerWidth-40,x))
-    rocket.style.left=x+"px"
-    requestAnimationFrame(moveRocket)
-}
-moveRocket()
-
-/* BUTTONS MOBILE */
-leftBtn.addEventListener("touchstart",e=>{e.preventDefault(); moveLeft=true})
-leftBtn.addEventListener("touchend",e=>{e.preventDefault(); moveLeft=false})
-rightBtn.addEventListener("touchstart",e=>{e.preventDefault(); moveRight=true})
-rightBtn.addEventListener("touchend",e=>{e.preventDefault(); moveRight=false})
-
-function spawnRock(){
-    if(gameOver)return
-    let r=document.createElement("div")
-    r.className="rock"
-    r.style.left=Math.random()*(innerWidth-50)+"px"
-    r.style.top="-60px"
-    game.appendChild(r)
-
-    let fall=setInterval(()=>{
-        if(gameOver){clearInterval(fall);return}
-        let t=parseInt(r.style.top)
-        r.style.top=t+speed+"px"
-        let a=r.getBoundingClientRect(),b=rocket.getBoundingClientRect()
-        if(a.bottom>b.top && a.top<b.bottom && a.left<b.right && a.right>b.left){
-            endGame();clearInterval(fall); r.remove()
-        }
-        if(t>innerHeight){r.remove();clearInterval(fall)}
-    },20)
-    setTimeout(spawnRock,spawnDelay)
-}
-
-function endGame(){
-    gameOver=true
-    finalScore.textContent="Score : "+score
-    gameover.style.display="flex"
-
-    let best=localStorage.getItem("bestScore")||0
-    if(score>best)localStorage.setItem("bestScore",score)
-
-    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
-    data.push({name:player,score})
-    data.sort((a,b)=>b.score-a.score)
-    localStorage.setItem("leaderboard",JSON.stringify(data.slice(0,10)))
-
-    updateBest()
-}
-
-function goHome(){
-    switchScreen(home)
-}
+function updateBest(){bestTxt.textContent="Meilleur score : "+(localStorage.getItem("bestScore")||0)}
+function goHome(){switchScreen(home)}
+function switchScreen(s){[home,game,leader].forEach(e=>e.classList.remove("active")); s.classList.add("active")}
 </script>
 
 </body>
