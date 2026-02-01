@@ -157,192 +157,209 @@ button{background:#2196f3;color:white;cursor:pointer}
 </div>
 
 <script>
-const home=document.getElementById("home-screen")
-const game=document.getElementById("game-screen")
-const leader=document.getElementById("leaderboard-screen")
-const rocket=document.getElementById("rocket")
-const scoreTxt=document.getElementById("score")
-const bestTxt=document.getElementById("best")
-const list=document.getElementById("leaderboard-list")
-const gameover=document.getElementById("gameover")
-const finalScore=document.getElementById("finalScore")
-const pseudoInput=document.getElementById("pseudo")
+const home = document.getElementById("home-screen");
+const game = document.getElementById("game-screen");
+const leader = document.getElementById("leaderboard-screen");
+const rocket = document.getElementById("rocket");
+const scoreTxt = document.getElementById("score");
+const bestTxt = document.getElementById("best");
+const list = document.getElementById("leaderboard-list");
+const gameover = document.getElementById("gameover");
+const finalScore = document.getElementById("finalScore");
+const pseudoInput = document.getElementById("pseudo");
 
-let x=innerWidth/2-20
-let score=0,baseSpeed=4,speed=4,spawnDelay=800
-let speedMultiplier=1,pointMultiplier=1
-let activatedThresholds=new Set()
-let gameOver=false
-let scoreInterval
-let stars=[]
+let x = innerWidth / 2 - 20;
+let score = 0;
+let baseSpeed = 4, speed = 4, spawnDelay = 800;
+let speedMultiplier = 1, pointMultiplier = 1;
+let activatedThresholds = new Set();
+let gameOver = false;
+let scoreInterval = null;
+let rockIntervals = [];
+let stars = [];
 
 /* ÉTOILES */
-function spawnStars(){
-    stars.forEach(s=>s.remove())
-    stars=[]
-    for(let i=0;i<120;i++){
-        let s=document.createElement("div")
-        s.className="star"
-        s.style.left=Math.random()*innerWidth+"px"
-        s.style.top=Math.random()*innerHeight+"px"
-        game.appendChild(s)
-        stars.push(s)
+function spawnStars() {
+    stars.forEach(s => s.remove());
+    stars = [];
+    for (let i = 0; i < 120; i++) {
+        let s = document.createElement("div");
+        s.className = "star";
+        s.style.left = Math.random() * innerWidth + "px";
+        s.style.top = Math.random() * innerHeight + "px";
+        game.appendChild(s);
+        stars.push(s);
     }
 }
-function moveStars(){
-    stars.forEach(s=>{
-        let t=parseFloat(s.style.top)
-        t+=2
-        if(t>innerHeight) t=0
-        s.style.top=t+"px"
-    })
-    if(!gameOver) requestAnimationFrame(moveStars)
+function moveStars() {
+    stars.forEach(s => {
+        let t = parseFloat(s.style.top);
+        t += 2;
+        if (t > innerHeight) t = 0;
+        s.style.top = t + "px";
+    });
+    if (!gameOver) requestAnimationFrame(moveStars);
 }
 
-/* EXPONENTIEL */
-function loopScore(){
-    clearInterval(scoreInterval)
-    scoreInterval=setInterval(()=>{
-        if(gameOver)return
-        score+=pointMultiplier
-        scoreTxt.textContent="Score : "+score
+/* SCORE ET SEUILS */
+function loopScore() {
+    clearInterval(scoreInterval);
+    scoreInterval = setInterval(() => {
+        if (gameOver) return;
 
-        let thresholds=[100,250,500,1000]
-        if(score>=1500){
-            let extra=Math.floor((score-1500)/500)
-            for(let i=0;i<=extra;i++) thresholds.push(1500+i*500)
+        score += pointMultiplier;
+        scoreTxt.textContent = "Score : " + score;
+
+        let thresholds = [100, 250, 500, 1000];
+        if (score >= 1500) {
+            let extra = Math.floor((score - 1500) / 500);
+            for (let i = 0; i <= extra; i++) thresholds.push(1500 + i * 500);
         }
 
-        thresholds.forEach(t=>{
-            if(score>=t && !activatedThresholds.has(t)){
-                activatedThresholds.add(t)
-                speedMultiplier*=2
-                pointMultiplier*=2
-                speed=baseSpeed*speedMultiplier
-                spawnDelay=Math.max(120,800/speedMultiplier)
+        thresholds.forEach(t => {
+            if (score >= t && !activatedThresholds.has(t)) {
+                activatedThresholds.add(t);
+                speedMultiplier *= 2;
+                pointMultiplier *= 2;
+                speed = baseSpeed * speedMultiplier;
+                spawnDelay = Math.max(120, 800 / speedMultiplier);
             }
-        })
-    },250)
+        });
+    }, 250);
 }
 
 /* CONTROLES FLUIDES */
-let leftPressed=false
-let rightPressed=false
-setInterval(()=>{
-    if(gameOver)return
-    if(leftPressed)x-=6
-    if(rightPressed)x+=6
-    x=Math.max(0,Math.min(innerWidth-40,x))
-    rocket.style.left=x+"px"
-},16)
+let leftPressed = false, rightPressed = false;
+setInterval(() => {
+    if (gameOver) return;
+    if (leftPressed) x -= 6;
+    if (rightPressed) x += 6;
+    x = Math.max(0, Math.min(innerWidth - 40, x));
+    rocket.style.left = x + "px";
+}, 16);
 
 /* CLAVIER */
-document.addEventListener("keydown",e=>{
-    if(e.key==="ArrowLeft") leftPressed=true
-    if(e.key==="ArrowRight") rightPressed=true
-})
-document.addEventListener("keyup",e=>{
-    if(e.key==="ArrowLeft") leftPressed=false
-    if(e.key==="ArrowRight") rightPressed=false
-})
+document.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") leftPressed = true;
+    if (e.key === "ArrowRight") rightPressed = true;
+});
+document.addEventListener("keyup", e => {
+    if (e.key === "ArrowLeft") leftPressed = false;
+    if (e.key === "ArrowRight") rightPressed = false;
+});
 
 /* MOBILE */
-const leftBtn=document.getElementById("leftBtn")
-const rightBtn=document.getElementById("rightBtn")
-;["touchstart","mousedown"].forEach(ev=>{
-    leftBtn.addEventListener(ev,e=>{e.preventDefault();leftPressed=true})
-    rightBtn.addEventListener(ev,e=>{e.preventDefault();rightPressed=true})
-})
-;["touchend","mouseup","mouseleave"].forEach(ev=>{
-    leftBtn.addEventListener(ev,()=>leftPressed=false)
-    rightBtn.addEventListener(ev,()=>rightPressed=false)
-})
+const leftBtn = document.getElementById("leftBtn");
+const rightBtn = document.getElementById("rightBtn");
+["touchstart", "mousedown"].forEach(ev => {
+    leftBtn.addEventListener(ev, e => { e.preventDefault(); leftPressed = true; });
+    rightBtn.addEventListener(ev, e => { e.preventDefault(); rightPressed = true; });
+});
+["touchend", "mouseup", "mouseleave"].forEach(ev => {
+    leftBtn.addEventListener(ev, () => leftPressed = false);
+    rightBtn.addEventListener(ev, () => rightPressed = false);
+});
 
 /* JEU */
-function play(){
-    score=0
-    speedMultiplier=1
-    pointMultiplier=1
-    activatedThresholds=new Set()
-    gameOver=false
-    x=innerWidth/2-20
-    rocket.style.left=x+"px"
-    scoreTxt.textContent="Score : 0"
-    gameover.style.display="none"
-    document.querySelectorAll(".rock").forEach(r=>r.remove())
-    spawnStars()
-    moveStars()
-    switchScreen(game)
-    loopScore()
-    spawnRock()
+function play() {
+    score = 0;
+    speedMultiplier = 1;
+    pointMultiplier = 1;
+    speed = baseSpeed;
+    spawnDelay = 800;
+    activatedThresholds = new Set();
+    gameOver = false;
+    x = innerWidth / 2 - 20;
+    rocket.style.left = x + "px";
+    scoreTxt.textContent = "Score : 0";
+    gameover.style.display = "none";
+
+    document.querySelectorAll(".rock").forEach(r => r.remove());
+    rockIntervals.forEach(int => clearInterval(int));
+    rockIntervals = [];
+
+    spawnStars();
+    moveStars();
+
+    switchScreen(game);
+    loopScore();
+    spawnRock();
 }
 
 /* ROCKS */
-function spawnRock(){
-    if(gameOver)return
-    let r=document.createElement("div")
-    r.className="rock"
-    r.style.left=Math.random()*(innerWidth-50)+"px"
-    r.style.top="-60px"
-    game.appendChild(r)
+function spawnRock() {
+    if (gameOver) return;
+    let r = document.createElement("div");
+    r.className = "rock";
+    r.style.left = Math.random() * (innerWidth - 50) + "px";
+    r.style.top = "-60px";
+    game.appendChild(r);
 
-    let fall=setInterval(()=>{
-        if(gameOver){r.remove();clearInterval(fall);return}
-        r.style.top=parseInt(r.style.top)+speed+"px"
-        let a=r.getBoundingClientRect()
-        let b=rocket.getBoundingClientRect()
-        if(a.bottom>b.top && a.top<b.bottom && a.left<b.right && a.right>b.left){
-            r.remove()
-            clearInterval(fall)
-            endGame()
+    let fall = setInterval(() => {
+        if (gameOver) { r.remove(); clearInterval(fall); return; }
+        r.style.top = parseInt(r.style.top) + speed + "px";
+
+        let a = r.getBoundingClientRect();
+        let b = rocket.getBoundingClientRect();
+        if (a.bottom > b.top && a.top < b.bottom && a.left < b.right && a.right > b.left) {
+            r.remove();
+            clearInterval(fall);
+            endGame();
         }
-        if(parseInt(r.style.top)>innerHeight){
-            r.remove();clearInterval(fall)
+        if (parseInt(r.style.top) > innerHeight) {
+            r.remove(); clearInterval(fall);
         }
-    },20)
-    setTimeout(spawnRock,spawnDelay)
+    }, 20);
+
+    rockIntervals.push(fall);
+    setTimeout(spawnRock, spawnDelay);
 }
 
-function endGame(){
-    gameOver=true
-    clearInterval(scoreInterval)
-    finalScore.textContent="Score : "+score
+/* GAME OVER */
+function endGame() {
+    gameOver = true;
+    clearInterval(scoreInterval);
+    rockIntervals.forEach(int => clearInterval(int));
+    rockIntervals = [];
 
-    /* SCORE ET CLASSEMENT */
-    let best=localStorage.getItem("bestScore")||0
-    if(score>best) localStorage.setItem("bestScore",score)
-    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
-    data.push({name:pseudoInput.value||"Anonyme",score})
-    data.sort((a,b)=>b.score-a.score)
-    localStorage.setItem("leaderboard",JSON.stringify(data.slice(0,10)))
+    finalScore.textContent = "Score : " + score;
 
-    gameover.style.display="flex"
-    updateBest()
+    let best = localStorage.getItem("bestScore") || 0;
+    if (score > best) localStorage.setItem("bestScore", score);
+    let data = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+    data.push({ name: pseudoInput.value || "Anonyme", score });
+    data.sort((a, b) => b.score - a.score);
+    localStorage.setItem("leaderboard", JSON.stringify(data.slice(0, 10)));
+
+    gameover.style.display = "flex";
+    updateBest();
 }
 
 /* CLASSEMENT */
-function showLeaderboard(){
-    list.innerHTML=""
-    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
-    for(let i=0;i<10;i++){
-        let d=document.createElement("div")
-        if(data[i]){
-            let cls=i==0?"gold":i==1?"silver":i==2?"bronze":"normal"
-            let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":"#"+(i+1)
-            d.className="item "+cls
-            d.innerHTML=`<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`
-        }else{
-            d.className="item empty"
-            d.innerHTML=`<span>#${i+1} — Libre</span><span>—</span>`
+function showLeaderboard() {
+    list.innerHTML = "";
+    let data = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+    for (let i = 0; i < 10; i++) {
+        let d = document.createElement("div");
+        if (data[i]) {
+            let cls = i == 0 ? "gold" : i == 1 ? "silver" : i == 2 ? "bronze" : "normal";
+            let medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "#" + (i + 1);
+            d.className = "item " + cls;
+            d.innerHTML = `<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`;
+        } else {
+            d.className = "item empty";
+            d.innerHTML = `<span>#${i + 1} — Libre</span><span>—</span>`;
         }
-        list.appendChild(d)
+        list.appendChild(d);
     }
-    switchScreen(leader)
+    switchScreen(leader);
 }
 
-function updateBest(){bestTxt.textContent="Meilleur score : "+(localStorage.getItem("bestScore")||0)}
-function goHome(){switchScreen(home)}
-function switchScreen(s){[home,game,leader].forEach(e=>e.classList.remove("active")); s.classList.add("active")}
+function updateBest() {
+    bestTxt.textContent = "Meilleur score : " + (localStorage.getItem("bestScore") || 0);
+}
+function goHome() { switchScreen(home); }
+function switchScreen(s) { [home, game, leader].forEach(e => e.classList.remove("active")); s.classList.add("active"); }
 </script>
 
 </body>
