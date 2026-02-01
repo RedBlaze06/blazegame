@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <title>Fusée Infinity</title>
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <style>
 *{box-sizing:border-box}
@@ -28,12 +27,12 @@ body{
 }
 .active{display:flex}
 
-/* ===== ACCUEIL ===== */
+/* ACCUEIL */
 #home-screen{
     background:
-        linear-gradient(to top, rgba(0,0,0,.65), rgba(0,0,0,.2)),
-        url("https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1600&q=80")
-        center/cover no-repeat;
+    linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.2)),
+    url("https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1600&q=80")
+    center/cover no-repeat;
 }
 #title{font-size:42px;text-shadow:0 0 15px white}
 input,button{
@@ -42,40 +41,30 @@ input,button{
     border-radius:10px;
     border:none
 }
-button{background:#2196f3;color:white;cursor:pointer}
+button{background:#2196f3;color:white}
 #best{position:absolute;bottom:20px;left:20px}
 
-/* ===== CLASSEMENT ===== */
+/* CLASSEMENT */
 #leaderboard-screen{
     background:linear-gradient(180deg,#0f2027,#203a43,#2c5364);
     padding-top:30px
 }
-#leader-title{font-size:36px;text-shadow:0 0 10px gold}
-#leader-sub{opacity:.8}
 #leaderboard-list{width:320px}
-.item{
-    display:flex;
-    justify-content:space-between;
-    padding:10px;
-    margin:6px 0;
-    border-radius:12px
-}
+.item{display:flex;justify-content:space-between;padding:10px;margin:6px 0;border-radius:12px}
 .gold{background:linear-gradient(90deg,#ffd700,#ffb300);color:black}
 .silver{background:linear-gradient(90deg,#cfd8dc,#b0bec5);color:black}
 .bronze{background:linear-gradient(90deg,#cd7f32,#a97142);color:black}
 .normal{background:rgba(255,255,255,.15)}
 .empty{border:2px dashed rgba(255,255,255,.3);opacity:.5}
 
-/* ===== JEU ===== */
+/* JEU */
 #game-screen{background:black;overflow:hidden}
 .star{position:absolute;width:2px;height:2px;background:white;opacity:.8}
 
 .rocket{
     position:absolute;
     bottom:60px;
-    width:40px;
-    height:80px;
-    z-index:3;
+    width:40px;height:80px;
 }
 .nose{
     width:0;height:0;
@@ -83,61 +72,32 @@ button{background:#2196f3;color:white;cursor:pointer}
     border-right:20px solid transparent;
     border-bottom:25px solid #b71c1c;
 }
-.body{
-    width:40px;
-    height:55px;
-    background:#d32f2f;
-    border-radius:10px;
-}
-.wing{
-    position:absolute;
-    width:20px;height:20px;
-    background:#ff9800;
-    bottom:15px
-}
+.body{width:40px;height:55px;background:#d32f2f;border-radius:10px}
+.wing{position:absolute;width:20px;height:20px;background:#ff9800;bottom:15px}
 .wing.left{left:-18px}
 .wing.right{right:-18px}
 .flame{
-    width:12px;
-    height:18px;
+    width:12px;height:18px;
     background:orange;
     margin:0 auto;
     animation:flame .2s infinite alternate;
 }
-@keyframes flame{
-    from{height:14px}
-    to{height:22px;background:yellow}
-}
+@keyframes flame{from{height:14px}to{height:22px;background:yellow}}
 
-.rock{
-    position:absolute;
-    width:50px;height:50px;
-    background:gray;
-    border-radius:50%;
-    z-index:2
-}
-#score{
-    position:absolute;
-    top:10px;
-    left:10px;
-    font-size:22px;
-    z-index:5
-}
+.rock{position:absolute;width:50px;height:50px;background:gray;border-radius:50%}
+#score{position:absolute;top:10px;left:10px;font-size:22px}
 
 /* GAME OVER */
 #gameover{
-    position:absolute;
-    inset:0;
+    position:absolute;inset:0;
     background:rgba(0,0,0,.85);
     display:none;
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:20px;
-    z-index:10
 }
 
-/* ===== CONTROLES MOBILE ===== */
+/* CONTROLES MOBILE */
 #mobile-controls{
     position:absolute;
     bottom:20px;
@@ -145,7 +105,6 @@ button{background:#2196f3;color:white;cursor:pointer}
     display:flex;
     justify-content:space-between;
     padding:0 20px;
-    z-index:20
 }
 #mobile-controls button{
     width:80px;height:80px;
@@ -159,7 +118,6 @@ button{background:#2196f3;color:white;cursor:pointer}
 
 <body>
 
-<!-- ACCUEIL -->
 <div id="home-screen" class="screen active">
     <div id="title">FUSÉE INFINITY</div>
     <input id="pseudo" placeholder="Ton pseudo">
@@ -168,15 +126,12 @@ button{background:#2196f3;color:white;cursor:pointer}
     <div id="best">Meilleur score : 0</div>
 </div>
 
-<!-- CLASSEMENT -->
 <div id="leaderboard-screen" class="screen">
-    <div id="leader-title">🏆 CLASSEMENT</div>
-    <div id="leader-sub">TOP 1 → TOP 10</div>
+    <h1>🏆 CLASSEMENT</h1>
     <div id="leaderboard-list"></div>
     <button onclick="goHome()">Retour</button>
 </div>
 
-<!-- JEU -->
 <div id="game-screen" class="screen">
     <div id="score">Score : 0</div>
 
@@ -213,82 +168,88 @@ const finalScore=document.getElementById("finalScore")
 const pseudoInput=document.getElementById("pseudo")
 
 let x=innerWidth/2-20
-let score=0,speed=4,spawnDelay=800,gameOver=false,player=""
+let score=0,baseSpeed=4,speed=4,spawnDelay=800
+let speedMultiplier=1,pointMultiplier=1
+let activatedThresholds=new Set()
+let gameOver=false
 let scoreInterval
 
-function switchScreen(s){
-    [home,game,leader].forEach(e=>e.classList.remove("active"))
-    s.classList.add("active")
+/* EXPONENTIEL */
+function loopScore(){
+    clearInterval(scoreInterval)
+    scoreInterval=setInterval(()=>{
+        if(gameOver)return
+        score+=pointMultiplier
+        scoreTxt.textContent="Score : "+score
+
+        let thresholds=[100,250,500,1000]
+        if(score>=1500){
+            let extra=Math.floor((score-1500)/500)
+            for(let i=0;i<=extra;i++) thresholds.push(1500+i*500)
+        }
+
+        thresholds.forEach(t=>{
+            if(score>=t && !activatedThresholds.has(t)){
+                activatedThresholds.add(t)
+                speedMultiplier*=2
+                pointMultiplier*=2
+                speed=baseSpeed*speedMultiplier
+                spawnDelay=Math.max(120,800/speedMultiplier)
+            }
+        })
+    },250)
 }
 
-function updateBest(){
-    bestTxt.textContent="Meilleur score : "+(localStorage.getItem("bestScore")||0)
-}
-updateBest()
+/* CONTROLES FLUIDES */
+let leftPressed=false
+let rightPressed=false
 
-function spawnStars(){
-    document.querySelectorAll(".star").forEach(s=>s.remove())
-    for(let i=0;i<100;i++){
-        let s=document.createElement("div")
-        s.className="star"
-        s.style.left=Math.random()*innerWidth+"px"
-        s.style.top=Math.random()*innerHeight+"px"
-        game.appendChild(s)
-        setInterval(()=>{
-            if(gameOver)return
-            s.style.top=(parseInt(s.style.top)+2)%innerHeight+"px"
-        },60)
-    }
-}
+setInterval(()=>{
+    if(gameOver)return
+    if(leftPressed) x-=6
+    if(rightPressed) x+=6
+    x=Math.max(0,Math.min(innerWidth-40,x))
+    rocket.style.left=x+"px"
+},16)
 
+/* CLAVIER */
+document.addEventListener("keydown",e=>{
+    if(e.key==="ArrowLeft") leftPressed=true
+    if(e.key==="ArrowRight") rightPressed=true
+})
+document.addEventListener("keyup",e=>{
+    if(e.key==="ArrowLeft") leftPressed=false
+    if(e.key==="ArrowRight") rightPressed=false
+})
+
+/* MOBILE */
+const leftBtn=document.getElementById("leftBtn")
+const rightBtn=document.getElementById("rightBtn")
+;["touchstart","mousedown"].forEach(ev=>{
+    leftBtn.addEventListener(ev,e=>{e.preventDefault();leftPressed=true})
+    rightBtn.addEventListener(ev,e=>{e.preventDefault();rightPressed=true})
+})
+;["touchend","mouseup","mouseleave"].forEach(ev=>{
+    leftBtn.addEventListener(ev,()=>leftPressed=false)
+    rightBtn.addEventListener(ev,()=>rightPressed=false)
+})
+
+/* JEU */
 function play(){
-    player=pseudoInput.value||"Anonyme"
     score=0
-    speed=4
-    spawnDelay=800
+    speedMultiplier=1
+    pointMultiplier=1
+    activatedThresholds=new Set()
     gameOver=false
     x=innerWidth/2-20
     rocket.style.left=x+"px"
     scoreTxt.textContent="Score : 0"
     gameover.style.display="none"
     document.querySelectorAll(".rock").forEach(r=>r.remove())
-    spawnStars()
     switchScreen(game)
     loopScore()
     spawnRock()
 }
-
-function loopScore(){
-    clearInterval(scoreInterval)
-    scoreInterval=setInterval(()=>{
-        if(gameOver)return
-        score++
-        scoreTxt.textContent="Score : "+score
-    },200)
-}
-
-/* CLAVIER PC */
-document.addEventListener("keydown",e=>{
-    if(gameOver||!game.classList.contains("active"))return
-    if(e.key==="ArrowLeft")x-=30
-    if(e.key==="ArrowRight")x+=30
-    x=Math.max(0,Math.min(innerWidth-40,x))
-    rocket.style.left=x+"px"
-})
-
-/* MOBILE */
-const leftBtn=document.getElementById("leftBtn")
-const rightBtn=document.getElementById("rightBtn")
-function move(dx){
-    if(gameOver)return
-    x+=dx
-    x=Math.max(0,Math.min(innerWidth-40,x))
-    rocket.style.left=x+"px"
-}
-leftBtn.addEventListener("touchstart",e=>{e.preventDefault();move(-30)})
-rightBtn.addEventListener("touchstart",e=>{e.preventDefault();move(30)})
-leftBtn.addEventListener("mousedown",()=>move(-30))
-rightBtn.addEventListener("mousedown",()=>move(30))
 
 function spawnRock(){
     if(gameOver)return
@@ -309,8 +270,7 @@ function spawnRock(){
             endGame()
         }
         if(parseInt(r.style.top)>innerHeight){
-            r.remove()
-            clearInterval(fall)
+            r.remove();clearInterval(fall)
         }
     },20)
     setTimeout(spawnRock,spawnDelay)
@@ -321,30 +281,14 @@ function endGame(){
     clearInterval(scoreInterval)
     finalScore.textContent="Score : "+score
     gameover.style.display="flex"
-    let best=localStorage.getItem("bestScore")||0
-    if(score>best)localStorage.setItem("bestScore",score)
-    updateBest()
 }
 
-function showLeaderboard(){
-    list.innerHTML=""
-    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
-    for(let i=0;i<10;i++){
-        let d=document.createElement("div")
-        if(data[i]){
-            let cls=i==0?"gold":i==1?"silver":i==2?"bronze":"normal"
-            d.className="item "+cls
-            d.innerHTML=`<span>#${i+1} ${data[i].name}</span><span>${data[i].score}</span>`
-        }else{
-            d.className="item empty"
-            d.innerHTML=`<span>#${i+1} — Libre</span><span>—</span>`
-        }
-        list.appendChild(d)
-    }
-    switchScreen(leader)
-}
-
+function showLeaderboard(){switchScreen(leader)}
 function goHome(){switchScreen(home)}
+function switchScreen(s){
+    [home,game,leader].forEach(e=>e.classList.remove("active"))
+    s.classList.add("active")
+}
 </script>
 
 </body>
