@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Fusée Infinity</title>
 
-<!-- 🔒 ANTI ZOOM MOBILE -->
 <meta name="viewport"
 content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
@@ -14,34 +13,21 @@ body{margin:0;background:black;color:white;font-family:Arial, sans-serif;overflo
 .active{display:flex}
 
 /* ===== ACCUEIL ===== */
-#home-screen{
-    background:url("rocket-bg.jpg") center/cover;
-}
+#home-screen{background:url("rocket-bg.jpg") center/cover}
 #title{font-size:42px;text-shadow:0 0 10px white}
-input,button{
-    padding:12px 20px;
-    font-size:18px;
-    border-radius:10px;
-    border:none;
-}
+input,button{padding:12px 20px;font-size:18px;border-radius:10px;border:none}
 button{background:#2196f3;color:white;cursor:pointer}
 #best{position:absolute;bottom:20px;left:20px}
 
 /* ===== CLASSEMENT ===== */
 #leaderboard-screen{
     background:linear-gradient(180deg,#0f2027,#203a43,#2c5364);
-    padding-top:30px;
+    padding-top:30px
 }
 #leader-title{font-size:36px;text-shadow:0 0 10px gold}
 #leader-sub{opacity:.8}
 #leaderboard-list{width:320px}
-.item{
-    display:flex;
-    justify-content:space-between;
-    padding:10px;
-    margin:6px 0;
-    border-radius:12px;
-}
+.item{display:flex;justify-content:space-between;padding:10px;margin:6px 0;border-radius:12px}
 .gold{background:linear-gradient(90deg,#ffd700,#ffb300);color:black}
 .silver{background:linear-gradient(90deg,#cfd8dc,#b0bec5);color:black}
 .bronze{background:linear-gradient(90deg,#cd7f32,#a97142);color:black}
@@ -50,35 +36,38 @@ button{background:#2196f3;color:white;cursor:pointer}
 
 /* ===== JEU ===== */
 #game-screen{background:black;overflow:hidden}
-.star{position:absolute;width:2px;height:2px;background:white}
+.star{position:absolute;width:2px;height:2px;background:white;opacity:.8}
 
-/* Fusée */
 .rocket{
     position:absolute;
     bottom:60px;
     left:50%;
     transform:translateX(-50%);
     width:40px;height:80px;
-    z-index:3;
+    z-index:3
 }
 .body{width:40px;height:55px;background:#d32f2f;border-radius:10px}
 .nose{
+    width:0;height:0;
     border-left:20px solid transparent;
     border-right:20px solid transparent;
-    border-bottom:25px solid #b71c1c;
+    border-bottom:25px solid #b71c1c
 }
 .wing{
     position:absolute;
     width:20px;height:20px;
     background:#ff9800;
-    bottom:15px;
+    bottom:15px
 }
 .wing.left{left:-18px}
 .wing.right{right:-18px}
 .flame{
-    width:12px;height:18px;
+    width:12px;
+    height:18px;
     background:orange;
-    animation:flame .2s infinite alternate;
+    margin:0 auto;
+    display:block;
+    animation:flame .2s infinite alternate
 }
 @keyframes flame{to{height:22px;background:yellow}}
 
@@ -87,6 +76,7 @@ button{background:#2196f3;color:white;cursor:pointer}
     width:50px;height:50px;
     background:gray;
     border-radius:50%;
+    z-index:2
 }
 #score{position:absolute;top:10px;left:10px;font-size:22px;z-index:5}
 
@@ -96,28 +86,30 @@ button{background:#2196f3;color:white;cursor:pointer}
     inset:0;
     background:rgba(0,0,0,.85);
     display:none;
-    z-index:10;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:20px;
+    z-index:10
 }
 
 /* ===== CONTROLES MOBILE ===== */
 #mobile-controls{
     position:absolute;
     bottom:20px;
-    left:0;
-    right:0;
+    left:0;right:0;
     display:flex;
     justify-content:space-between;
     padding:0 20px;
     z-index:20;
-    touch-action:none;
+    touch-action:none
 }
 #mobile-controls button{
-    width:80px;
-    height:80px;
+    width:80px;height:80px;
     font-size:32px;
     border-radius:50%;
     background:rgba(255,255,255,.2);
-    color:white;
+    color:white
 }
 </style>
 </head>
@@ -153,7 +145,6 @@ button{background:#2196f3;color:white;cursor:pointer}
         <div class="flame"></div>
     </div>
 
-    <!-- BOUTONS MOBILE -->
     <div id="mobile-controls">
         <button id="leftBtn">⬅️</button>
         <button id="rightBtn">➡️</button>
@@ -167,19 +158,19 @@ button{background:#2196f3;color:white;cursor:pointer}
 </div>
 
 <script>
-/* 🔒 ANTI ZOOM */
-document.addEventListener("touchstart", e=>{
-    if(e.touches.length>1) e.preventDefault()
+/* ANTI ZOOM */
+document.addEventListener("touchstart",e=>{
+    if(e.touches.length>1)e.preventDefault()
 },{passive:false})
 
 let lastTouch=0
-document.addEventListener("touchend", e=>{
+document.addEventListener("touchend",e=>{
     let now=Date.now()
-    if(now-lastTouch<300) e.preventDefault()
+    if(now-lastTouch<300)e.preventDefault()
     lastTouch=now
 },{passive:false})
 
-const home=homeScreen=document.getElementById("home-screen")
+const home=document.getElementById("home-screen")
 const game=document.getElementById("game-screen")
 const leader=document.getElementById("leaderboard-screen")
 const rocket=document.getElementById("rocket")
@@ -204,8 +195,10 @@ function play(){
     speedMultiplier=1;pointMultiplier=1;activatedThresholds.clear()
     scoreTxt.textContent="Score : 0"
     gameover.style.display="none"
+    document.querySelectorAll(".rock").forEach(r=>r.remove())
     switchScreen(game)
-    loopScore();spawnRock()
+    loopScore()
+    spawnRock()
 }
 
 /* SCORE */
@@ -218,7 +211,7 @@ function loopScore(){
         let thresholds=[100,250,500,1000]
         if(score>=1500){
             let extra=Math.floor((score-1500)/500)
-            for(let i=0;i<=extra;i++) thresholds.push(1500+i*500)
+            for(let i=0;i<=extra;i++)thresholds.push(1500+i*500)
         }
         thresholds.forEach(t=>{
             if(score>=t&&!activatedThresholds.has(t)){
@@ -260,14 +253,20 @@ function spawnRock(){
     r.style.left=Math.random()*(innerWidth-50)+"px"
     r.style.top="-60px"
     game.appendChild(r)
+
     let fall=setInterval(()=>{
         if(gameOver){clearInterval(fall);return}
         r.style.top=parseInt(r.style.top)+speed+"px"
         let a=r.getBoundingClientRect(),b=rocket.getBoundingClientRect()
         if(a.bottom>b.top&&a.top<b.bottom&&a.left<b.right&&a.right>b.left){
-            endGame();clearInterval(fall)
+            r.remove()
+            clearInterval(fall)
+            endGame()
         }
-        if(parseInt(r.style.top)>innerHeight){r.remove();clearInterval(fall)}
+        if(parseInt(r.style.top)>innerHeight){
+            r.remove()
+            clearInterval(fall)
+        }
     },20)
     setTimeout(spawnRock,spawnDelay)
 }
@@ -284,7 +283,7 @@ function endGame(){
 
 function goHome(){switchScreen(home)}
 
-/* ===== CONTROLES MOBILE ULTRA RAPIDES ===== */
+/* CONTROLES PC + MOBILE */
 let movingLeft=false,movingRight=false
 const leftBtn=document.getElementById("leftBtn")
 const rightBtn=document.getElementById("rightBtn")
@@ -294,16 +293,25 @@ leftBtn.addEventListener("touchend",e=>{e.preventDefault();movingLeft=false},{pa
 rightBtn.addEventListener("touchstart",e=>{e.preventDefault();movingRight=true},{passive:false})
 rightBtn.addEventListener("touchend",e=>{e.preventDefault();movingRight=false},{passive:false})
 
-function mobileLoop(){
+document.addEventListener("keydown",e=>{
+    if(e.key==="ArrowLeft")movingLeft=true
+    if(e.key==="ArrowRight")movingRight=true
+})
+document.addEventListener("keyup",e=>{
+    if(e.key==="ArrowLeft")movingLeft=false
+    if(e.key==="ArrowRight")movingRight=false
+})
+
+function moveLoop(){
     if(!gameOver&&game.classList.contains("active")){
         if(movingLeft)x-=8
         if(movingRight)x+=8
         x=Math.max(0,Math.min(innerWidth-40,x))
         rocket.style.left=x+"px"
     }
-    requestAnimationFrame(mobileLoop)
+    requestAnimationFrame(moveLoop)
 }
-mobileLoop()
+moveLoop()
 </script>
 
 </body>
