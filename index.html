@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Fusée Infinity</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- 🔒 ANTI ZOOM MOBILE -->
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <style>
 body{margin:0;background:black;color:white;font-family:Arial, sans-serif;overflow:hidden}
 .screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px}
@@ -26,10 +30,7 @@ button{background:#2196f3;color:white;cursor:pointer}
 /* ===== CLASSEMENT ===== */
 #leaderboard-screen{
     background:linear-gradient(180deg,#0f2027,#203a43,#2c5364);
-    flex-direction:column;
-    align-items:center;
     padding-top:30px;
-    gap:15px;
 }
 #leader-title{font-size:36px;text-shadow:0 0 10px gold}
 #leader-sub{opacity:.8}
@@ -49,9 +50,9 @@ button{background:#2196f3;color:white;cursor:pointer}
 
 /* ===== JEU ===== */
 #game-screen{background:black;overflow:hidden}
-.star{position:absolute;width:2px;height:2px;background:white;opacity:.8}
+.star{position:absolute;width:2px;height:2px;background:white}
 
-/* Fusée stylée */
+/* Fusée */
 .rocket{
     position:absolute;
     bottom:60px;
@@ -62,7 +63,6 @@ button{background:#2196f3;color:white;cursor:pointer}
 }
 .body{width:40px;height:55px;background:#d32f2f;border-radius:10px}
 .nose{
-    width:0;height:0;
     border-left:20px solid transparent;
     border-right:20px solid transparent;
     border-bottom:25px solid #b71c1c;
@@ -73,22 +73,20 @@ button{background:#2196f3;color:white;cursor:pointer}
     background:#ff9800;
     bottom:15px;
 }
-.wing.left{left:-18px;clip-path:polygon(100% 0,0 50%,100% 100%)}
-.wing.right{right:-18px;clip-path:polygon(0 0,100% 50%,0 100%)}
+.wing.left{left:-18px}
+.wing.right{right:-18px}
 .flame{
     width:12px;height:18px;
     background:orange;
-    margin:auto;
     animation:flame .2s infinite alternate;
 }
-@keyframes flame{from{height:14px}to{height:22px;background:yellow}}
+@keyframes flame{to{height:22px;background:yellow}}
 
 .rock{
     position:absolute;
     width:50px;height:50px;
     background:gray;
     border-radius:50%;
-    z-index:2;
 }
 #score{position:absolute;top:10px;left:10px;font-size:22px;z-index:5}
 
@@ -98,11 +96,28 @@ button{background:#2196f3;color:white;cursor:pointer}
     inset:0;
     background:rgba(0,0,0,.85);
     display:none;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:20px;
     z-index:10;
+}
+
+/* ===== CONTROLES MOBILE ===== */
+#mobile-controls{
+    position:absolute;
+    bottom:20px;
+    left:0;
+    right:0;
+    display:flex;
+    justify-content:space-between;
+    padding:0 20px;
+    z-index:20;
+    touch-action:none;
+}
+#mobile-controls button{
+    width:80px;
+    height:80px;
+    font-size:32px;
+    border-radius:50%;
+    background:rgba(255,255,255,.2);
+    color:white;
 }
 </style>
 </head>
@@ -138,6 +153,12 @@ button{background:#2196f3;color:white;cursor:pointer}
         <div class="flame"></div>
     </div>
 
+    <!-- BOUTONS MOBILE -->
+    <div id="mobile-controls">
+        <button id="leftBtn">⬅️</button>
+        <button id="rightBtn">➡️</button>
+    </div>
+
     <div id="gameover">
         <h1>💥 VOUS AVEZ PERDU 💥</h1>
         <div id="finalScore"></div>
@@ -145,27 +166,20 @@ button{background:#2196f3;color:white;cursor:pointer}
     </div>
 </div>
 
-<!-- ==== FIREBASE ==== -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js"></script>
-
 <script>
-const firebaseConfig = {
-  apiKey: "TON_API_KEY",
-  authDomain: "TON_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://fusee-infinity-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "TON_PROJECT_ID",
-  storageBucket: "TON_PROJECT_ID.appspot.com",
-  messagingSenderId: "TON_SENDER_ID",
-  appId: "TON_APP_ID"
-};
+/* 🔒 ANTI ZOOM */
+document.addEventListener("touchstart", e=>{
+    if(e.touches.length>1) e.preventDefault()
+},{passive:false})
 
-const app = firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-</script>
+let lastTouch=0
+document.addEventListener("touchend", e=>{
+    let now=Date.now()
+    if(now-lastTouch<300) e.preventDefault()
+    lastTouch=now
+},{passive:false})
 
-<script>
-const home=document.getElementById("home-screen")
+const home=homeScreen=document.getElementById("home-screen")
 const game=document.getElementById("game-screen")
 const leader=document.getElementById("leaderboard-screen")
 const rocket=document.getElementById("rocket")
@@ -177,105 +191,51 @@ const finalScore=document.getElementById("finalScore")
 const pseudoInput=document.getElementById("pseudo")
 
 let x=innerWidth/2,score=0,speed=4,spawnDelay=800,gameOver=false,player=""
-let baseSpeed=4, speedMultiplier=1, pointMultiplier=1, activatedThresholds = new Set(), scoreInterval
+let baseSpeed=4,speedMultiplier=1,pointMultiplier=1,activatedThresholds=new Set(),scoreInterval
 
 function switchScreen(s){
     [home,game,leader].forEach(e=>e.classList.remove("active"))
     s.classList.add("active")
 }
 
-function updateBest(){
-    bestTxt.textContent="Meilleur score : "+(localStorage.getItem("bestScore")||0)
-}
-updateBest()
-
-/* ÉTOILES */
-function spawnStars(){
-    document.querySelectorAll(".star").forEach(s=>s.remove())
-    for(let i=0;i<120;i++){
-        let s=document.createElement("div")
-        s.className="star"
-        s.style.left=Math.random()*innerWidth+"px"
-        s.style.top=Math.random()*innerHeight+"px"
-        game.appendChild(s)
-        setInterval(()=>{
-            if(gameOver)return
-            s.style.top=(parseInt(s.style.top)+2)%innerHeight+"px"
-        },60)
-    }
-}
-
-/* JOUER */
 function play(){
-    player = pseudoInput.value || "Anonyme";
-    score = 0;
-    baseSpeed = 4;
-    speed = baseSpeed;
-    spawnDelay = 800;
-    gameOver = false;
-    speedMultiplier = 1;
-    pointMultiplier = 1;
-    activatedThresholds = new Set();
-    scoreTxt.textContent = "Score : 0";
-    gameover.style.display = "none";
-    document.querySelectorAll(".rock").forEach(r=>r.remove());
-    spawnStars();
-    switchScreen(game);
-    loopScore();
-    spawnRock();
+    player=pseudoInput.value||"Anonyme"
+    score=0;speed=4;spawnDelay=800;gameOver=false
+    speedMultiplier=1;pointMultiplier=1;activatedThresholds.clear()
+    scoreTxt.textContent="Score : 0"
+    gameover.style.display="none"
+    switchScreen(game)
+    loopScore();spawnRock()
 }
 
-/* SCORE EXPONENTIEL ET DIFFICULTÉ */
+/* SCORE */
 function loopScore(){
-    clearInterval(scoreInterval);
-    scoreInterval = setInterval(()=>{
-        if(gameOver) return;
-        score += pointMultiplier;
-        scoreTxt.textContent = "Score : " + score;
-
-        let thresholds = [100, 250, 500, 1000];
-        if(score >= 1500){
-            let extra = Math.floor((score - 1500) / 500);
-            for(let i = 0; i <= extra; i++) thresholds.push(1500 + i*500);
+    clearInterval(scoreInterval)
+    scoreInterval=setInterval(()=>{
+        if(gameOver)return
+        score+=pointMultiplier
+        scoreTxt.textContent="Score : "+score
+        let thresholds=[100,250,500,1000]
+        if(score>=1500){
+            let extra=Math.floor((score-1500)/500)
+            for(let i=0;i<=extra;i++) thresholds.push(1500+i*500)
         }
-
         thresholds.forEach(t=>{
-            if(score >= t && !activatedThresholds.has(t)){
-                activatedThresholds.add(t);
-                speedMultiplier *= 2;
-                pointMultiplier *= 2;
-                speed = baseSpeed * speedMultiplier;
-                spawnDelay = Math.max(100, 800 / speedMultiplier);
+            if(score>=t&&!activatedThresholds.has(t)){
+                activatedThresholds.add(t)
+                speedMultiplier*=2
+                pointMultiplier*=2
+                speed=baseSpeed*speedMultiplier
+                spawnDelay=Math.max(100,800/speedMultiplier)
             }
-        });
-
-    }, 250);
+        })
+    },250)
 }
 
-/* ===== FIREBASE - CLASSEMENT ===== */
-async function sendScoreToFirebase(player, score) {
-    const scoresRef = database.ref('scores');
-    await scoresRef.push({
-      name: player,
-      score: score,
-      date: Date.now()
-    });
-}
-
-async function getTop10FromFirebase() {
-    const scoresRef = database.ref('scores');
-    const snapshot = await scoresRef.orderByChild('score').limitToLast(10).once('value');
-    const scores = [];
-    snapshot.forEach(child => scores.push(child.val()));
-    scores.sort((a,b)=>b.score - a.score);
-    return scores;
-}
-
-async function showLeaderboard(){
-    list.innerHTML = "";
-
-    const data = await getTop10FromFirebase();
-
+/* CLASSEMENT */
+function showLeaderboard(){
+    list.innerHTML=""
+    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
     for(let i=0;i<10;i++){
         let d=document.createElement("div")
         if(data[i]){
@@ -289,19 +249,10 @@ async function showLeaderboard(){
         }
         list.appendChild(d)
     }
-
     switchScreen(leader)
 }
 
-/* CONTROLES */
-document.addEventListener("keydown",e=>{
-    if(gameOver||!game.classList.contains("active"))return
-    if(e.key==="ArrowLeft")x-=30
-    if(e.key==="ArrowRight")x+=30
-    x=Math.max(0,Math.min(innerWidth-40,x))
-    rocket.style.left=x+"px"
-})
-
+/* ROCHERS */
 function spawnRock(){
     if(gameOver)return
     let r=document.createElement("div")
@@ -309,35 +260,50 @@ function spawnRock(){
     r.style.left=Math.random()*(innerWidth-50)+"px"
     r.style.top="-60px"
     game.appendChild(r)
-
     let fall=setInterval(()=>{
         if(gameOver){clearInterval(fall);return}
-        let t=parseInt(r.style.top)
-        r.style.top=t+speed+"px"
+        r.style.top=parseInt(r.style.top)+speed+"px"
         let a=r.getBoundingClientRect(),b=rocket.getBoundingClientRect()
-        if(a.bottom>b.top && a.top<b.bottom && a.left<b.right && a.right>b.left){
+        if(a.bottom>b.top&&a.top<b.bottom&&a.left<b.right&&a.right>b.left){
             endGame();clearInterval(fall)
         }
-        if(t>innerHeight){r.remove();clearInterval(fall)}
+        if(parseInt(r.style.top)>innerHeight){r.remove();clearInterval(fall)}
     },20)
     setTimeout(spawnRock,spawnDelay)
 }
 
-async function endGame(){
+function endGame(){
     gameOver=true
     finalScore.textContent="Score : "+score
     gameover.style.display="flex"
-
-    let best=localStorage.getItem("bestScore")||0
-    if(score>best)localStorage.setItem("bestScore",score)
-
-    await sendScoreToFirebase(player, score)
-    updateBest()
+    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
+    data.push({name:player,score})
+    data.sort((a,b)=>b.score-a.score)
+    localStorage.setItem("leaderboard",JSON.stringify(data.slice(0,10)))
 }
 
-function goHome(){
-    switchScreen(home)
+function goHome(){switchScreen(home)}
+
+/* ===== CONTROLES MOBILE ULTRA RAPIDES ===== */
+let movingLeft=false,movingRight=false
+const leftBtn=document.getElementById("leftBtn")
+const rightBtn=document.getElementById("rightBtn")
+
+leftBtn.addEventListener("touchstart",e=>{e.preventDefault();movingLeft=true},{passive:false})
+leftBtn.addEventListener("touchend",e=>{e.preventDefault();movingLeft=false},{passive:false})
+rightBtn.addEventListener("touchstart",e=>{e.preventDefault();movingRight=true},{passive:false})
+rightBtn.addEventListener("touchend",e=>{e.preventDefault();movingRight=false},{passive:false})
+
+function mobileLoop(){
+    if(!gameOver&&game.classList.contains("active")){
+        if(movingLeft)x-=8
+        if(movingRight)x+=8
+        x=Math.max(0,Math.min(innerWidth-40,x))
+        rocket.style.left=x+"px"
+    }
+    requestAnimationFrame(mobileLoop)
 }
+mobileLoop()
 </script>
 
 </body>
