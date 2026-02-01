@@ -40,13 +40,15 @@ input,button{
     border-radius:10px;
     border:none
 }
-button{background:#2196f3;color:white}
+button{background:#2196f3;color:white;cursor:pointer}
 #best{position:absolute;bottom:20px;left:20px}
 
 /* CLASSEMENT */
 #leaderboard-screen{
     background:linear-gradient(180deg,#0f2027,#203a43,#2c5364);
-    padding-top:30px
+    padding-top:30px;
+    gap:10px;
+    flex-direction:column;
 }
 #leaderboard-list{width:320px}
 .item{display:flex;justify-content:space-between;padding:10px;margin:6px 0;border-radius:12px}
@@ -187,7 +189,6 @@ function spawnStars(){
         stars.push(s)
     }
 }
-
 function moveStars(){
     stars.forEach(s=>{
         let t=parseFloat(s.style.top)
@@ -276,6 +277,7 @@ function play(){
     spawnRock()
 }
 
+/* ROCKS */
 function spawnRock(){
     if(gameOver)return
     let r=document.createElement("div")
@@ -305,15 +307,42 @@ function endGame(){
     gameOver=true
     clearInterval(scoreInterval)
     finalScore.textContent="Score : "+score
+
+    /* SCORE ET CLASSEMENT */
+    let best=localStorage.getItem("bestScore")||0
+    if(score>best) localStorage.setItem("bestScore",score)
+    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
+    data.push({name:pseudoInput.value||"Anonyme",score})
+    data.sort((a,b)=>b.score-a.score)
+    localStorage.setItem("leaderboard",JSON.stringify(data.slice(0,10)))
+
     gameover.style.display="flex"
+    updateBest()
 }
 
-function showLeaderboard(){switchScreen(leader)}
-function goHome(){switchScreen(home)}
-function switchScreen(s){
-    [home,game,leader].forEach(e=>e.classList.remove("active"))
-    s.classList.add("active")
+/* CLASSEMENT */
+function showLeaderboard(){
+    list.innerHTML=""
+    let data=JSON.parse(localStorage.getItem("leaderboard")||"[]")
+    for(let i=0;i<10;i++){
+        let d=document.createElement("div")
+        if(data[i]){
+            let cls=i==0?"gold":i==1?"silver":i==2?"bronze":"normal"
+            let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":"#"+(i+1)
+            d.className="item "+cls
+            d.innerHTML=`<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`
+        }else{
+            d.className="item empty"
+            d.innerHTML=`<span>#${i+1} — Libre</span><span>—</span>`
+        }
+        list.appendChild(d)
+    }
+    switchScreen(leader)
 }
+
+function updateBest(){bestTxt.textContent="Meilleur score : "+(localStorage.getItem("bestScore")||0)}
+function goHome(){switchScreen(home)}
+function switchScreen(s){[home,game,leader].forEach(e=>e.classList.remove("active")); s.classList.add("active")}
 </script>
 
 </body>
