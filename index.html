@@ -245,6 +245,7 @@ function loopScore(){
         score += pointMultiplier;
         scoreTxt.textContent = "Score : " + score;
 
+        // Seuils exponentiels fixes
         let thresholds = [100,250,500,1000];
         if(score>=1500){
             let extra=Math.floor((score-1500)/500);
@@ -254,8 +255,8 @@ function loopScore(){
         thresholds.forEach(t=>{
             if(score>=t && !activatedThresholds.has(t)){
                 activatedThresholds.add(t)
-                speedMultiplier*=2
-                pointMultiplier*=2
+                speedMultiplier=Math.pow(2,activatedThresholds.size)
+                pointMultiplier=Math.pow(2,activatedThresholds.size)
                 speed=baseSpeed*speedMultiplier
                 spawnDelay=Math.max(100,800/speedMultiplier)
             }
