@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Fusée Infinity</title>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <style>
@@ -59,7 +58,7 @@ button{background:#2196f3;color:white}
 
 /* JEU */
 #game-screen{background:black;overflow:hidden}
-.star{position:absolute;width:2px;height:2px;background:white;opacity:.8}
+.star{position:absolute;width:2px;height:2px;background:white;opacity:.8;pointer-events:none}
 
 .rocket{
     position:absolute;
@@ -173,6 +172,31 @@ let speedMultiplier=1,pointMultiplier=1
 let activatedThresholds=new Set()
 let gameOver=false
 let scoreInterval
+let stars=[]
+
+/* ÉTOILES */
+function spawnStars(){
+    stars.forEach(s=>s.remove())
+    stars=[]
+    for(let i=0;i<120;i++){
+        let s=document.createElement("div")
+        s.className="star"
+        s.style.left=Math.random()*innerWidth+"px"
+        s.style.top=Math.random()*innerHeight+"px"
+        game.appendChild(s)
+        stars.push(s)
+    }
+}
+
+function moveStars(){
+    stars.forEach(s=>{
+        let t=parseFloat(s.style.top)
+        t+=2
+        if(t>innerHeight) t=0
+        s.style.top=t+"px"
+    })
+    if(!gameOver) requestAnimationFrame(moveStars)
+}
 
 /* EXPONENTIEL */
 function loopScore(){
@@ -203,11 +227,10 @@ function loopScore(){
 /* CONTROLES FLUIDES */
 let leftPressed=false
 let rightPressed=false
-
 setInterval(()=>{
     if(gameOver)return
-    if(leftPressed) x-=6
-    if(rightPressed) x+=6
+    if(leftPressed)x-=6
+    if(rightPressed)x+=6
     x=Math.max(0,Math.min(innerWidth-40,x))
     rocket.style.left=x+"px"
 },16)
@@ -246,6 +269,8 @@ function play(){
     scoreTxt.textContent="Score : 0"
     gameover.style.display="none"
     document.querySelectorAll(".rock").forEach(r=>r.remove())
+    spawnStars()
+    moveStars()
     switchScreen(game)
     loopScore()
     spawnRock()
