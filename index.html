@@ -65,27 +65,19 @@ button{background:#2196f3;color:white;cursor:pointer}
 .rocket{
     position:absolute;
     bottom:60px;
-    width:40px;height:80px;
+    width:60px;
+    height:80px;
 }
-.nose{
-    width:0;height:0;
-    border-left:20px solid transparent;
-    border-right:20px solid transparent;
-    border-bottom:25px solid #b71c1c;
+.rocket img{
+    width:100%;
+    height:100%;
 }
-.body{width:40px;height:55px;background:#d32f2f;border-radius:10px}
-.wing{position:absolute;width:20px;height:20px;background:#ff9800;bottom:15px}
-.wing.left{left:-18px}
-.wing.right{right:-18px}
-.flame{
-    width:12px;height:18px;
-    background:orange;
-    margin:0 auto;
-    animation:flame .2s infinite alternate;
-}
-@keyframes flame{from{height:14px}to{height:22px;background:yellow}}
 
-.rock{position:absolute;width:50px;height:50px;background:gray;border-radius:50%}
+.rock{
+    position:absolute;
+    pointer-events:none;
+}
+
 #score{position:absolute;top:10px;left:10px;font-size:22px}
 
 /* GAME OVER */
@@ -137,11 +129,7 @@ button{background:#2196f3;color:white;cursor:pointer}
     <div id="score">Score : 0</div>
 
     <div class="rocket" id="rocket">
-        <div class="nose"></div>
-        <div class="body"></div>
-        <div class="wing left"></div>
-        <div class="wing right"></div>
-        <div class="flame"></div>
+        <img src="Fusee.png" alt="Fusée">
     </div>
 
     <div id="mobile-controls">
@@ -168,7 +156,7 @@ const gameover = document.getElementById("gameover");
 const finalScore = document.getElementById("finalScore");
 const pseudoInput = document.getElementById("pseudo");
 
-let x = innerWidth / 2 - 20;
+let x = innerWidth / 2 - 30;
 let score = 0;
 let baseSpeed = 4, speed = 4, spawnDelay = 800;
 let speedMultiplier = 1, pointMultiplier = 1;
@@ -177,6 +165,16 @@ let gameOver = false;
 let scoreInterval = null;
 let rockIntervals = [];
 let stars = [];
+
+/* Fusée et rochers avec tailles */
+const rocketSize = { width: 60, height: 80 };
+const rockImages = [
+    { src: "Roche1.png", width: 50, height: 50 },
+    { src: "Roche2.png", width: 60, height: 50 },
+    { src: "Roche3.png", width: 55, height: 55 },
+    { src: "Roche4.png", width: 50, height: 60 },
+    { src: "Roche5.png", width: 65, height: 50 },
+];
 
 /* ÉTOILES */
 function spawnStars() {
@@ -234,7 +232,7 @@ setInterval(() => {
     if (gameOver) return;
     if (leftPressed) x -= 6;
     if (rightPressed) x += 6;
-    x = Math.max(0, Math.min(innerWidth - 40, x));
+    x = Math.max(0, Math.min(innerWidth - rocketSize.width, x));
     rocket.style.left = x + "px";
 }, 16);
 
@@ -269,7 +267,7 @@ function play() {
     spawnDelay = 800;
     activatedThresholds = new Set();
     gameOver = false;
-    x = innerWidth / 2 - 20;
+    x = innerWidth / 2 - rocketSize.width/2;
     rocket.style.left = x + "px";
     scoreTxt.textContent = "Score : 0";
     gameover.style.display = "none";
@@ -289,9 +287,14 @@ function play() {
 /* ROCKS */
 function spawnRock() {
     if (gameOver) return;
-    let r = document.createElement("div");
+
+    let r = document.createElement("img");
+    let type = rockImages[Math.floor(Math.random() * rockImages.length)];
+    r.src = type.src;
     r.className = "rock";
-    r.style.left = Math.random() * (innerWidth - 50) + "px";
+    r.style.width = type.width + "px";
+    r.style.height = type.height + "px";
+    r.style.left = Math.random() * (innerWidth - type.width) + "px";
     r.style.top = "-60px";
     game.appendChild(r);
 
