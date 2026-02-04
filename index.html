@@ -112,7 +112,7 @@ button{background:#2196f3;color:white;cursor:pointer}
 <body>
 
 <div id="home-screen" class="screen active">
-    <div id="title">FUSÉE INFINITY</div>
+    <div id="title">FUSÉE DE L'INFINI</div>
     <input id="pseudo" placeholder="Ton pseudo">
     <button onclick="play()">Jouer</button>
     <button onclick="showLeaderboard()">Classement</button>
@@ -166,7 +166,6 @@ let scoreInterval = null;
 let rockIntervals = [];
 let stars = [];
 
-/* Fusée et rochers avec tailles */
 const rocketSize = { width: 60, height: 80 };
 const rockImages = [
     { src: "Roche1.png", width: 50, height: 50 },
@@ -175,6 +174,17 @@ const rockImages = [
     { src: "Roche4.png", width: 50, height: 60 },
     { src: "Roche5.png", width: 65, height: 50 },
 ];
+
+/* HITBOX REDUITE */
+function getHitbox(el, padX, padY) {
+    const r = el.getBoundingClientRect();
+    return {
+        left: r.left + padX,
+        right: r.right - padX,
+        top: r.top + padY,
+        bottom: r.bottom - padY
+    };
+}
 
 /* ÉTOILES */
 function spawnStars() {
@@ -199,34 +209,17 @@ function moveStars() {
     if (!gameOver) requestAnimationFrame(moveStars);
 }
 
-/* SCORE ET SEUILS */
+/* SCORE */
 function loopScore() {
     clearInterval(scoreInterval);
     scoreInterval = setInterval(() => {
         if (gameOver) return;
-
         score += pointMultiplier;
         scoreTxt.textContent = "Score : " + score;
-
-        let thresholds = [100, 250, 500, 1000];
-        if (score >= 1500) {
-            let extra = Math.floor((score - 1500) / 500);
-            for (let i = 0; i <= extra; i++) thresholds.push(1500 + i * 500);
-        }
-
-        thresholds.forEach(t => {
-            if (score >= t && !activatedThresholds.has(t)) {
-                activatedThresholds.add(t);
-                speedMultiplier *= 2;
-                pointMultiplier *= 2;
-                speed = baseSpeed * speedMultiplier;
-                spawnDelay = Math.max(120, 800 / speedMultiplier);
-            }
-        });
     }, 250);
 }
 
-/* CONTROLES FLUIDES */
+/* CONTROLES */
 let leftPressed = false, rightPressed = false;
 setInterval(() => {
     if (gameOver) return;
@@ -236,7 +229,6 @@ setInterval(() => {
     rocket.style.left = x + "px";
 }, 16);
 
-/* CLAVIER */
 document.addEventListener("keydown", e => {
     if (e.key === "ArrowLeft") leftPressed = true;
     if (e.key === "ArrowRight") rightPressed = true;
@@ -246,45 +238,25 @@ document.addEventListener("keyup", e => {
     if (e.key === "ArrowRight") rightPressed = false;
 });
 
-/* MOBILE */
-const leftBtn = document.getElementById("leftBtn");
-const rightBtn = document.getElementById("rightBtn");
-["touchstart", "mousedown"].forEach(ev => {
-    leftBtn.addEventListener(ev, e => { e.preventDefault(); leftPressed = true; });
-    rightBtn.addEventListener(ev, e => { e.preventDefault(); rightPressed = true; });
-});
-["touchend", "mouseup", "mouseleave"].forEach(ev => {
-    leftBtn.addEventListener(ev, () => leftPressed = false);
-    rightBtn.addEventListener(ev, () => rightPressed = false);
-});
-
 /* JEU */
 function play() {
     score = 0;
-    speedMultiplier = 1;
-    pointMultiplier = 1;
-    speed = baseSpeed;
-    spawnDelay = 800;
-    activatedThresholds = new Set();
     gameOver = false;
     x = innerWidth / 2 - rocketSize.width/2;
     rocket.style.left = x + "px";
     scoreTxt.textContent = "Score : 0";
     gameover.style.display = "none";
-
     document.querySelectorAll(".rock").forEach(r => r.remove());
-    rockIntervals.forEach(int => clearInterval(int));
+    rockIntervals.forEach(i => clearInterval(i));
     rockIntervals = [];
-
     spawnStars();
     moveStars();
-
     switchScreen(game);
     loopScore();
     spawnRock();
 }
 
-/* ROCKS */
+/* ROCHERS */
 function spawnRock() {
     if (gameOver) return;
 
@@ -302,13 +274,20 @@ function spawnRock() {
         if (gameOver) { r.remove(); clearInterval(fall); return; }
         r.style.top = parseInt(r.style.top) + speed + "px";
 
-        let a = r.getBoundingClientRect();
-        let b = rocket.getBoundingClientRect();
-        if (a.bottom > b.top && a.top < b.bottom && a.left < b.right && a.right > b.left) {
+        let rockBox = getHitbox(r, 8, 8);
+        let rocketBox = getHitbox(rocket, 14, 12);
+
+        if (
+            rockBox.bottom > rocketBox.top &&
+            rockBox.top < rocketBox.bottom &&
+            rockBox.left < rocketBox.right &&
+            rockBox.right > rocketBox.left
+        ) {
             r.remove();
             clearInterval(fall);
             endGame();
         }
+
         if (parseInt(r.style.top) > innerHeight) {
             r.remove(); clearInterval(fall);
         }
@@ -322,47 +301,23 @@ function spawnRock() {
 function endGame() {
     gameOver = true;
     clearInterval(scoreInterval);
-    rockIntervals.forEach(int => clearInterval(int));
-    rockIntervals = [];
-
     finalScore.textContent = "Score : " + score;
-
-    let best = localStorage.getItem("bestScore") || 0;
-    if (score > best) localStorage.setItem("bestScore", score);
-    let data = JSON.parse(localStorage.getItem("leaderboard") || "[]");
-    data.push({ name: pseudoInput.value || "Anonyme", score });
-    data.sort((a, b) => b.score - a.score);
-    localStorage.setItem("leaderboard", JSON.stringify(data.slice(0, 10)));
-
     gameover.style.display = "flex";
     updateBest();
 }
 
 /* CLASSEMENT */
 function showLeaderboard() {
-    list.innerHTML = "";
-    let data = JSON.parse(localStorage.getItem("leaderboard") || "[]");
-    for (let i = 0; i < 10; i++) {
-        let d = document.createElement("div");
-        if (data[i]) {
-            let cls = i == 0 ? "gold" : i == 1 ? "silver" : i == 2 ? "bronze" : "normal";
-            let medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "#" + (i + 1);
-            d.className = "item " + cls;
-            d.innerHTML = `<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`;
-        } else {
-            d.className = "item empty";
-            d.innerHTML = `<span>#${i + 1} — Libre</span><span>—</span>`;
-        }
-        list.appendChild(d);
-    }
     switchScreen(leader);
 }
-
 function updateBest() {
     bestTxt.textContent = "Meilleur score : " + (localStorage.getItem("bestScore") || 0);
 }
 function goHome() { switchScreen(home); }
-function switchScreen(s) { [home, game, leader].forEach(e => e.classList.remove("active")); s.classList.add("active"); }
+function switchScreen(s) {
+    [home, game, leader].forEach(e => e.classList.remove("active"));
+    s.classList.add("active");
+}
 </script>
 
 </body>
