@@ -138,6 +138,10 @@ button{background:#2196f3;color:white;cursor:pointer}
     </div>
 </div>
 
+<!-- FIREBASE SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore-compat.js"></script>
+
 <script>
 const home = document.getElementById("home-screen");
 const game = document.getElementById("game-screen");
@@ -159,6 +163,45 @@ let gameOver = false;
 let scoreInterval = null;
 let rockIntervals = [];
 let stars = [];
+
+/* FIREBASE */
+const firebaseConfig = {
+  apiKey: "AIzaSyAjbeUAbuM-KcWexVefe8Gcr8RbZWy4G4U",
+  authDomain: "fusee-infinity-59ba2.firebaseapp.com",
+  projectId: "fusee-infinity-59ba2",
+  storageBucket: "fusee-infinity-59ba2.firebasestorage.app",
+  messagingSenderId: "651850227698",
+  appId: "1:651850227698:web:437e8f620087acac94956b"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+async function sendScore(name, score) {
+    try {
+        await db.collection("leaderboard").add({
+            name,
+            score,
+            date: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (err) {
+        console.error("Erreur en envoyant le score:", err);
+    }
+}
+
+async function fetchLeaderboard() {
+    try {
+        const snapshot = await db.collection("leaderboard")
+          .orderBy("score", "desc")
+          .limit(10)
+          .get();
+        const data = [];
+        snapshot.forEach(doc => data.push(doc.data()));
+        return data;
+    } catch (err) {
+        console.error("Erreur en récupérant le leaderboard:", err);
+        return [];
+    }
+}
 
 /* HITBOX RÉDUITE */
 function getHitbox(el, px, py) {
@@ -330,7 +373,7 @@ function spawnRock() {
 }
 
 /* GAME OVER */
-function endGame() {
+async function endGame() {
     gameOver = true;
     clearInterval(scoreInterval);
     rockIntervals.forEach(int => clearInterval(int));
@@ -338,21 +381,19 @@ function endGame() {
 
     finalScore.textContent = "Score : " + score;
 
+    await sendScore(pseudoInput.value || "Anonyme", score);
+
     let best = localStorage.getItem("bestScore") || 0;
     if (score > best) localStorage.setItem("bestScore", score);
-    let data = JSON.parse(localStorage.getItem("leaderboard") || "[]");
-    data.push({ name: pseudoInput.value || "Anonyme", score });
-    data.sort((a, b) => b.score - a.score);
-    localStorage.setItem("leaderboard", JSON.stringify(data.slice(0, 10)));
 
     gameover.style.display = "flex";
     updateBest();
 }
 
 /* CLASSEMENT */
-function showLeaderboard() {
+async function showLeaderboard() {
     list.innerHTML = "";
-    let data = JSON.parse(localStorage.getItem("leaderboard") || "[]");
+    const data = await fetchLeaderboard();
     for (let i = 0; i < 10; i++) {
         let d = document.createElement("div");
         if (data[i]) {
