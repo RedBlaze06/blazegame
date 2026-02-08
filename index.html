@@ -41,7 +41,8 @@ input,button{
     border:none
 }
 button{background:#2196f3;color:white;cursor:pointer}
-#best{position:absolute;bottom:20px;left:20px}
+#best{position:absolute;bottom:40px;left:20px}
+#author{position:absolute;bottom:10px;left:20px;font-size:14px;color:#aaa}
 
 /* CLASSEMENT */
 #leaderboard-screen{
@@ -111,6 +112,7 @@ button{background:#2196f3;color:white;cursor:pointer}
     <button onclick="play()">Jouer</button>
     <button onclick="showLeaderboard()">Classement</button>
     <div id="best">Meilleur score : 0</div>
+    <div id="author">Osrin P</div>
 </div>
 
 <div id="leaderboard-screen" class="screen">
@@ -203,7 +205,6 @@ async function fetchLeaderboard() {
     }
 }
 
-/* HITBOX RÉDUITE */
 function getHitbox(el, px, py) {
     const r = el.getBoundingClientRect();
     return {
@@ -214,7 +215,6 @@ function getHitbox(el, px, py) {
     };
 }
 
-/* Fusée et rochers */
 const rocketSize = { width: 60, height: 80 };
 const rockImages = [
     { src: "Roche1.png", width: 50, height: 50 },
@@ -224,7 +224,6 @@ const rockImages = [
     { src: "Roche5.png", width: 65, height: 50 },
 ];
 
-/* ÉTOILES */
 function spawnStars() {
     stars.forEach(s => s.remove());
     stars = [];
@@ -247,7 +246,6 @@ function moveStars() {
     if (!gameOver) requestAnimationFrame(moveStars);
 }
 
-/* SCORE ET SEUILS */
 function loopScore() {
     clearInterval(scoreInterval);
     scoreInterval = setInterval(() => {
@@ -274,7 +272,6 @@ function loopScore() {
     }, 250);
 }
 
-/* CONTROLES */
 let leftPressed = false, rightPressed = false;
 setInterval(() => {
     if (gameOver) return;
@@ -293,7 +290,6 @@ document.addEventListener("keyup", e => {
     if (e.key === "ArrowRight") rightPressed = false;
 });
 
-/* MOBILE */
 const leftBtn = document.getElementById("leftBtn");
 const rightBtn = document.getElementById("rightBtn");
 ["touchstart", "mousedown"].forEach(ev => {
@@ -305,7 +301,6 @@ const rightBtn = document.getElementById("rightBtn");
     rightBtn.addEventListener(ev, () => rightPressed = false);
 });
 
-/* JEU */
 function play() {
     score = 0;
     speedMultiplier = 1;
@@ -331,7 +326,6 @@ function play() {
     spawnRock();
 }
 
-/* ROCKS */
 function spawnRock() {
     if (gameOver) return;
 
@@ -372,7 +366,6 @@ function spawnRock() {
     setTimeout(spawnRock, spawnDelay);
 }
 
-/* GAME OVER */
 async function endGame() {
     gameOver = true;
     clearInterval(scoreInterval);
@@ -390,7 +383,6 @@ async function endGame() {
     updateBest();
 }
 
-/* CLASSEMENT */
 async function showLeaderboard() {
     list.innerHTML = "";
     const data = await fetchLeaderboard();
