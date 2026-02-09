@@ -53,9 +53,9 @@ button{background:#2196f3;color:white;cursor:pointer}
 }
 #leaderboard-list{width:320px}
 .item{display:flex;justify-content:space-between;padding:10px;margin:6px 0;border-radius:12px}
-.gold{background:linear-gradient(90deg,#ffd700,#ffb300);color:black}
-.silver{background:linear-gradient(90deg,#cfd8dc,#b0bec5);color:black}
-.bronze{background:linear-gradient(90deg,#cd7f32,#a97142);color:black}
+.gold{background:linear-gradient(90deg,#ffd700,#ffb300);color:black;display:flex;align-items:center;gap:6px}
+.silver{background:linear-gradient(90deg,#cfd8dc,#b0bec5);color:black;display:flex;align-items:center;gap:6px}
+.bronze{background:linear-gradient(90deg,#cd7f32,#a97142);color:black;display:flex;align-items:center;gap:6px}
 .normal{background:rgba(255,255,255,.15)}
 .empty{border:2px dashed rgba(255,255,255,.3);opacity:.5}
 
@@ -215,13 +215,17 @@ function getHitbox(el, px, py) {
     };
 }
 
-const rocketSize = { width: 60, height: 80 };
+/* AJUSTEMENT TAILLE MOBILE/PC */
+function scaleWidth(w){ return w * innerWidth/800; } 
+function scaleHeight(h){ return h * innerHeight/600; }
+
+const rocketSize = { width: scaleWidth(60), height: scaleHeight(80) };
 const rockImages = [
-    { src: "Roche1.png", width: 50, height: 50 },
-    { src: "Roche2.png", width: 60, height: 50 },
-    { src: "Roche3.png", width: 55, height: 55 },
-    { src: "Roche4.png", width: 50, height: 60 },
-    { src: "Roche5.png", width: 65, height: 50 },
+    { src: "Roche1.png", width: scaleWidth(50), height: scaleHeight(50) },
+    { src: "Roche2.png", width: scaleWidth(60), height: scaleHeight(50) },
+    { src: "Roche3.png", width: scaleWidth(55), height: scaleHeight(55) },
+    { src: "Roche4.png", width: scaleWidth(50), height: scaleHeight(60) },
+    { src: "Roche5.png", width: scaleWidth(65), height: scaleHeight(50) },
 ];
 
 function spawnStars() {
@@ -298,7 +302,7 @@ const rightBtn = document.getElementById("rightBtn");
 });
 ["touchend", "mouseup", "mouseleave"].forEach(ev => {
     leftBtn.addEventListener(ev, () => leftPressed = false);
-    rightBtn.addEventListener(ev, () => rightPressed = false);
+    rightBtn.addEventListener(ev, () => rightPressed = false;
 });
 
 function play() {
