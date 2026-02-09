@@ -6,98 +6,131 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <style>
-*{box-sizing:border-box}
-body{
-    margin:0;
-    background:black;
-    color:white;
-    font-family:Arial,sans-serif;
-    overflow:hidden;
-    touch-action:none;
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    touch-action: none;
 }
-.screen{
-    position:absolute;
-    inset:0;
-    display:none;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:20px
+
+.screen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
 }
-.active{display:flex}
+
+.active { display: flex; }
 
 /* ACCUEIL */
-#home-screen{
-    background:
-    linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.2)),
-    url("https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1600&q=80")
-    center/cover no-repeat;
+#home-screen {
+    background: linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.2)),
+        url("https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1600&q=80") center/cover no-repeat;
 }
-#title{font-size:42px;text-shadow:0 0 15px white}
-input,button{
-    padding:12px 20px;
-    font-size:18px;
-    border-radius:10px;
-    border:none
+
+#title { font-size: 42px; text-shadow: 0 0 15px white; }
+
+input, button {
+    padding: 12px 20px;
+    font-size: 18px;
+    border-radius: 10px;
+    border: none;
 }
-button{background:#2196f3;color:white;cursor:pointer}
-#best{position:absolute;bottom:40px;left:20px}
-#author{position:absolute;bottom:10px;left:20px;font-size:14px;color:#aaa}
+
+button {
+    background: #2196f3;
+    color: white;
+    cursor: pointer;
+}
+
+#best { position: absolute; bottom: 40px; left: 20px; }
+#author { position: absolute; bottom: 10px; left: 20px; font-size: 14px; color: #aaa; }
 
 /* CLASSEMENT */
-#leaderboard-screen{
-    background:linear-gradient(180deg,#0f2027,#203a43,#2c5364);
-    padding-top:30px;
-    gap:10px;
-    flex-direction:column;
+#leaderboard-screen {
+    background: linear-gradient(180deg,#0f2027,#203a43,#2c5364);
+    padding-top: 30px;
+    gap: 10px;
+    flex-direction: column;
 }
-#leaderboard-list{width:320px}
-.item{display:flex;justify-content:space-between;padding:10px;margin:6px 0;border-radius:12px}
-.gold{background:linear-gradient(90deg,#ffd700,#ffb300);color:black}
-.silver{background:linear-gradient(90deg,#cfd8dc,#b0bec5);color:black}
-.bronze{background:linear-gradient(90deg,#cd7f32,#a97142);color:black}
-.normal{background:rgba(255,255,255,.15)}
-.empty{border:2px dashed rgba(255,255,255,.3);opacity:.5}
+
+#leaderboard-list { width: 320px; }
+
+.item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    margin: 6px 0;
+    border-radius: 12px;
+}
+
+.gold { background: linear-gradient(90deg,#ffd700,#ffb300); color: black; }
+.silver { background: linear-gradient(90deg,#cfd8dc,#b0bec5); color: black; }
+.bronze { background: linear-gradient(90deg,#cd7f32,#a97142); color: black; }
+.normal { background: rgba(255,255,255,.15); }
+.empty { border: 2px dashed rgba(255,255,255,.3); opacity: .5; }
 
 /* JEU */
-#game-screen{background:black;overflow:hidden}
-.star{position:absolute;width:2px;height:2px;background:white;opacity:.8;pointer-events:none}
+#game-screen { background: black; overflow: hidden; }
 
-.rocket{
-    position:absolute;
-    bottom:5%;
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: white;
+    opacity: .8;
+    pointer-events: none;
 }
-.rocket img{width:100%;height:100%}
 
-.rock{position:absolute;pointer-events:none}
+.rocket {
+    position: absolute;
+    bottom: 60px;
+    width: 60px;
+    height: 80px;
+}
 
-#score{position:absolute;top:10px;left:10px;font-size:22px}
+.rocket img { width: 100%; height: 100%; }
+
+.rock { position: absolute; pointer-events: none; }
+
+#score { position: absolute; top: 10px; left: 10px; font-size: 22px; }
 
 /* GAME OVER */
-#gameover{
-    position:absolute;inset:0;
-    background:rgba(0,0,0,.85);
-    display:none;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
+#gameover {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.85);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 /* CONTROLES MOBILE */
-#mobile-controls{
-    position:absolute;
-    bottom:20px;
-    left:0;right:0;
-    display:flex;
-    justify-content:space-between;
-    padding:0 20px;
+#mobile-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
 }
-#mobile-controls button{
-    width:80px;height:80px;
-    font-size:32px;
-    border-radius:50%;
-    background:rgba(255,255,255,.2);
-    color:white;
+
+#mobile-controls button {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.2);
+    color: white;
 }
 </style>
 </head>
@@ -107,8 +140,8 @@ button{background:#2196f3;color:white;cursor:pointer}
 <div id="home-screen" class="screen active">
     <div id="title">FUSÉE INFINITY</div>
     <input id="pseudo" placeholder="Ton pseudo">
-    <button id="playBtn">Jouer</button>
-    <button id="leaderBtn">Classement</button>
+    <button onclick="play()">Jouer</button>
+    <button onclick="showLeaderboard()">Classement</button>
     <div id="best">Meilleur score : 0</div>
     <div id="author">Osrin P</div>
 </div>
@@ -153,10 +186,8 @@ const list = document.getElementById("leaderboard-list");
 const gameover = document.getElementById("gameover");
 const finalScore = document.getElementById("finalScore");
 const pseudoInput = document.getElementById("pseudo");
-const playBtn = document.getElementById("playBtn");
-const leaderBtn = document.getElementById("leaderBtn");
 
-let x = innerWidth / 2;
+let x = innerWidth / 2 - 30;
 let score = 0;
 let baseSpeed = 4, speed = 4, spawnDelay = 800;
 let speedMultiplier = 1, pointMultiplier = 1;
@@ -168,12 +199,12 @@ let stars = [];
 
 /* FIREBASE */
 const firebaseConfig = {
-  apiKey: "AIzaSyAjbeUAbuM-KcWexVefe8Gcr8RbZWy4G4U",
-  authDomain: "fusee-infinity-59ba2.firebaseapp.com",
-  projectId: "fusee-infinity-59ba2",
-  storageBucket: "fusee-infinity-59ba2.firebasestorage.app",
-  messagingSenderId: "651850227698",
-  appId: "1:651850227698:web:437e8f620087acac94956b"
+    apiKey: "AIzaSyAjbeUAbuM-KcWexVefe8Gcr8RbZWy4G4U",
+    authDomain: "fusee-infinity-59ba2.firebaseapp.com",
+    projectId: "fusee-infinity-59ba2",
+    storageBucket: "fusee-infinity-59ba2.firebasestorage.app",
+    messagingSenderId: "651850227698",
+    appId: "1:651850227698:web:437e8f620087acac94956b"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
@@ -193,9 +224,9 @@ async function sendScore(name, score) {
 async function fetchLeaderboard() {
     try {
         const snapshot = await db.collection("leaderboard")
-          .orderBy("score", "desc")
-          .limit(10)
-          .get();
+            .orderBy("score", "desc")
+            .limit(10)
+            .get();
         const data = [];
         snapshot.forEach(doc => data.push(doc.data()));
         return data;
@@ -215,15 +246,13 @@ function getHitbox(el, px, py) {
     };
 }
 
-// Nouvelle taille dynamique
-let rocketSize = { width: innerWidth*0.08, height: innerHeight*0.12 };
-
+const rocketSize = { width: 60, height: 80 };
 const rockImages = [
-    { src: "Roche1.png", width: innerWidth*0.07, height: innerHeight*0.07 },
-    { src: "Roche2.png", width: innerWidth*0.08, height: innerHeight*0.06 },
-    { src: "Roche3.png", width: innerWidth*0.075, height: innerHeight*0.075 },
-    { src: "Roche4.png", width: innerWidth*0.07, height: innerHeight*0.08 },
-    { src: "Roche5.png", width: innerWidth*0.09, height: innerHeight*0.06 },
+    { src: "Roche1.png", width: 50, height: 50 },
+    { src: "Roche2.png", width: 60, height: 50 },
+    { src: "Roche3.png", width: 55, height: 55 },
+    { src: "Roche4.png", width: 50, height: 60 },
+    { src: "Roche5.png", width: 65, height: 50 },
 ];
 
 function spawnStars() {
@@ -238,6 +267,7 @@ function spawnStars() {
         stars.push(s);
     }
 }
+
 function moveStars() {
     stars.forEach(s => {
         let t = parseFloat(s.style.top);
@@ -252,7 +282,6 @@ function loopScore() {
     clearInterval(scoreInterval);
     scoreInterval = setInterval(() => {
         if (gameOver) return;
-
         score += pointMultiplier;
         scoreTxt.textContent = "Score : " + score;
 
@@ -275,6 +304,7 @@ function loopScore() {
 }
 
 let leftPressed = false, rightPressed = false;
+
 setInterval(() => {
     if (gameOver) return;
     if (leftPressed) x -= 6;
@@ -294,18 +324,16 @@ document.addEventListener("keyup", e => {
 
 const leftBtn = document.getElementById("leftBtn");
 const rightBtn = document.getElementById("rightBtn");
+
 ["touchstart", "mousedown"].forEach(ev => {
     leftBtn.addEventListener(ev, e => { e.preventDefault(); leftPressed = true; });
     rightBtn.addEventListener(ev, e => { e.preventDefault(); rightPressed = true; });
 });
+
 ["touchend", "mouseup", "mouseleave"].forEach(ev => {
     leftBtn.addEventListener(ev, () => leftPressed = false);
     rightBtn.addEventListener(ev, () => rightPressed = false);
 });
-
-// Boutons fonctionnels
-playBtn.addEventListener("click", play);
-leaderBtn.addEventListener("click", showLeaderboard);
 
 function play() {
     score = 0;
@@ -315,24 +343,15 @@ function play() {
     spawnDelay = 800;
     activatedThresholds = new Set();
     gameOver = false;
-
-    // Nouvelle taille dynamique
-    rocketSize = { width: innerWidth*0.08, height: innerHeight*0.12 };
-    rocket.style.width = rocketSize.width + "px";
-    rocket.style.height = rocketSize.height + "px";
-
-    x = innerWidth / 2 - rocketSize.width/2;
+    x = innerWidth / 2 - rocketSize.width / 2;
     rocket.style.left = x + "px";
     scoreTxt.textContent = "Score : 0";
     gameover.style.display = "none";
-
     document.querySelectorAll(".rock").forEach(r => r.remove());
     rockIntervals.forEach(int => clearInterval(int));
     rockIntervals = [];
-
     spawnStars();
     moveStars();
-
     switchScreen(game);
     loopScore();
     spawnRock();
@@ -340,7 +359,6 @@ function play() {
 
 function spawnRock() {
     if (gameOver) return;
-
     let r = document.createElement("img");
     let type = rockImages[Math.floor(Math.random() * rockImages.length)];
     r.src = type.src;
@@ -370,7 +388,8 @@ function spawnRock() {
         }
 
         if (parseInt(r.style.top) > innerHeight) {
-            r.remove(); clearInterval(fall);
+            r.remove();
+            clearInterval(fall);
         }
     }, 20);
 
@@ -383,14 +402,10 @@ async function endGame() {
     clearInterval(scoreInterval);
     rockIntervals.forEach(int => clearInterval(int));
     rockIntervals = [];
-
     finalScore.textContent = "Score : " + score;
-
     await sendScore(pseudoInput.value || "Anonyme", score);
-
     let best = localStorage.getItem("bestScore") || 0;
     if (score > best) localStorage.setItem("bestScore", score);
-
     gameover.style.display = "flex";
     updateBest();
 }
@@ -417,9 +432,13 @@ async function showLeaderboard() {
 function updateBest() {
     bestTxt.textContent = "Meilleur score : " + (localStorage.getItem("bestScore") || 0);
 }
-function goHome() { switchScreen(home); }
-function switchScreen(s) { [home, game, leader].forEach(e => e.classList.remove("active")); s.classList.add("active"); }
 
+function goHome() { switchScreen(home); }
+
+function switchScreen(s) {
+    [home, game, leader].forEach(e => e.classList.remove("active"));
+    s.classList.add("active");
+}
 </script>
 
 </body>
