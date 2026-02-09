@@ -53,9 +53,9 @@ button{background:#2196f3;color:white;cursor:pointer}
 }
 #leaderboard-list{width:320px}
 .item{display:flex;justify-content:space-between;padding:10px;margin:6px 0;border-radius:12px}
-.gold{background:linear-gradient(90deg,#ffd700,#ffb300);color:black;display:flex;align-items:center;gap:6px}
-.silver{background:linear-gradient(90deg,#cfd8dc,#b0bec5);color:black;display:flex;align-items:center;gap:6px}
-.bronze{background:linear-gradient(90deg,#cd7f32,#a97142);color:black;display:flex;align-items:center;gap:6px}
+.gold{background:linear-gradient(90deg,#ffd700,#ffb300);color:black}
+.silver{background:linear-gradient(90deg,#cfd8dc,#b0bec5);color:black}
+.bronze{background:linear-gradient(90deg,#cd7f32,#a97142);color:black}
 .normal{background:rgba(255,255,255,.15)}
 .empty{border:2px dashed rgba(255,255,255,.3);opacity:.5}
 
@@ -65,9 +65,7 @@ button{background:#2196f3;color:white;cursor:pointer}
 
 .rocket{
     position:absolute;
-    bottom:60px;
-    width:60px;
-    height:80px;
+    bottom:5%;
 }
 .rocket img{width:100%;height:100%}
 
@@ -109,8 +107,8 @@ button{background:#2196f3;color:white;cursor:pointer}
 <div id="home-screen" class="screen active">
     <div id="title">FUSÉE INFINITY</div>
     <input id="pseudo" placeholder="Ton pseudo">
-    <button onclick="play()">Jouer</button>
-    <button onclick="showLeaderboard()">Classement</button>
+    <button id="playBtn">Jouer</button>
+    <button id="leaderBtn">Classement</button>
     <div id="best">Meilleur score : 0</div>
     <div id="author">Osrin P</div>
 </div>
@@ -155,8 +153,10 @@ const list = document.getElementById("leaderboard-list");
 const gameover = document.getElementById("gameover");
 const finalScore = document.getElementById("finalScore");
 const pseudoInput = document.getElementById("pseudo");
+const playBtn = document.getElementById("playBtn");
+const leaderBtn = document.getElementById("leaderBtn");
 
-let x = innerWidth / 2 - 30;
+let x = innerWidth / 2;
 let score = 0;
 let baseSpeed = 4, speed = 4, spawnDelay = 800;
 let speedMultiplier = 1, pointMultiplier = 1;
@@ -215,17 +215,15 @@ function getHitbox(el, px, py) {
     };
 }
 
-/* AJUSTEMENT TAILLE MOBILE/PC */
-function scaleWidth(w){ return w * innerWidth/800; } 
-function scaleHeight(h){ return h * innerHeight/600; }
+// Nouvelle taille dynamique
+let rocketSize = { width: innerWidth*0.08, height: innerHeight*0.12 };
 
-const rocketSize = { width: scaleWidth(60), height: scaleHeight(80) };
 const rockImages = [
-    { src: "Roche1.png", width: scaleWidth(50), height: scaleHeight(50) },
-    { src: "Roche2.png", width: scaleWidth(60), height: scaleHeight(50) },
-    { src: "Roche3.png", width: scaleWidth(55), height: scaleHeight(55) },
-    { src: "Roche4.png", width: scaleWidth(50), height: scaleHeight(60) },
-    { src: "Roche5.png", width: scaleWidth(65), height: scaleHeight(50) },
+    { src: "Roche1.png", width: innerWidth*0.07, height: innerHeight*0.07 },
+    { src: "Roche2.png", width: innerWidth*0.08, height: innerHeight*0.06 },
+    { src: "Roche3.png", width: innerWidth*0.075, height: innerHeight*0.075 },
+    { src: "Roche4.png", width: innerWidth*0.07, height: innerHeight*0.08 },
+    { src: "Roche5.png", width: innerWidth*0.09, height: innerHeight*0.06 },
 ];
 
 function spawnStars() {
@@ -305,6 +303,10 @@ const rightBtn = document.getElementById("rightBtn");
     rightBtn.addEventListener(ev, () => rightPressed = false);
 });
 
+// Boutons fonctionnels
+playBtn.addEventListener("click", play);
+leaderBtn.addEventListener("click", showLeaderboard);
+
 function play() {
     score = 0;
     speedMultiplier = 1;
@@ -313,6 +315,12 @@ function play() {
     spawnDelay = 800;
     activatedThresholds = new Set();
     gameOver = false;
+
+    // Nouvelle taille dynamique
+    rocketSize = { width: innerWidth*0.08, height: innerHeight*0.12 };
+    rocket.style.width = rocketSize.width + "px";
+    rocket.style.height = rocketSize.height + "px";
+
     x = innerWidth / 2 - rocketSize.width/2;
     rocket.style.left = x + "px";
     scoreTxt.textContent = "Score : 0";
@@ -411,6 +419,7 @@ function updateBest() {
 }
 function goHome() { switchScreen(home); }
 function switchScreen(s) { [home, game, leader].forEach(e => e.classList.remove("active")); s.classList.add("active"); }
+
 </script>
 
 </body>
