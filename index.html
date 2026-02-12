@@ -160,8 +160,8 @@ button {
 <div id="leaderboard-screen" class="screen">
     <h1>🏆 CLASSEMENT</h1>
     <div id="leaderboard-buttons">
-        <button id="seasonBtn" onclick="showSeasonLeaderboard()">Cette saison</button>
-        <button id="alltimeBtn" onclick="showAlltimeLeaderboard()">Tout le temps</button>
+        <button onclick="showSeasonLeaderboard()">Saison 1</button>
+        <button onclick="showAlltimeLeaderboard()">Tout le temps</button>
     </div>
     <div id="leaderboard-list"></div>
     <button onclick="goHome()">Retour</button>
@@ -223,296 +223,192 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// Active leaderboard par défaut : saison
-let currentLeaderboard = "season"; // season ou alltime
-
-/* -------------------- NOUVEAU : COPIE DES SCORES -------------------- */
-async function copyLeaderboardTo(collectionName) {
-    try {
-        const snapshot = await db.collection("leaderboard").get();
-        for (const doc of snapshot.docs) {
-            const data = doc.data();
-            await db.collection(collectionName).add({
-                name: data.name || "Anonyme",
-                score: Number(data.score) || 0,
-                date: data.date || firebase.firestore.FieldValue.serverTimestamp()
-            });
-        }
-        console.log(`✅ Scores copiés vers ${collectionName}`);
-    } catch (err) {
-        console.error("Erreur copie leaderboard :", err);
-    }
-}
-
-// Fonction pour démarrer une nouvelle saison
-async function startNewSeason(seasonNumber) {
-    // Copie des scores actuels vers All Time
-    await copyLeaderboardTo("leaderboard_all_time");
-
-    // Copie des scores actuels vers la saison en cours
-    const seasonCollection = "leaderboard_season" + seasonNumber;
-    await copyLeaderboardTo(seasonCollection);
-
-    console.log(`✅ Saison ${seasonNumber} initialisée`);
-}
-
-/* -------------------- FIN NOUVEAU -------------------- */
+// Active leaderboard par défaut
+let currentLeaderboard = "season1"; // season1 ou alltime
 
 async function sendScore(name, score) {
     try {
-        // Toujours envoyer dans all time et saison en cours
-        await db.collection("leaderboard_all_time").add({
-            name,
-            score,
+        // Toujours envoyer dans all-time
+        await db.collection("leaderboard").add({
+            name, score,
             date: firebase.firestore.FieldValue.serverTimestamp()
         });
-        await db.collection("leaderboard_season").add({
-            name,
-            score,
+        // Si saison 1 active, envoyer aussi dans season1
+        await db.collection("leaderboard_season1").add({
+            name, score,
             date: firebase.firestore.FieldValue.serverTimestamp()
         });
-    } catch (err) {
-        console.error("Erreur en envoyant le score:", err);
-    }
+    } catch(err) { console.error("Erreur en envoyant le score:", err); }
 }
 
 async function fetchLeaderboard(collection) {
     try {
         const snapshot = await db.collection(collection)
-            .orderBy("score", "desc")
+            .orderBy("score","desc")
             .limit(10)
             .get();
         const data = [];
         snapshot.forEach(doc => data.push(doc.data()));
         return data;
-    } catch (err) {
-        console.error("Erreur en récupérant le leaderboard:", err);
-        return [];
-    }
+    } catch(err) { console.error("Erreur leaderboard:", err); return []; }
 }
 
-// Helpers pour étoiles, collisions...
+function displayLeaderboard(collection) {
+    fetchLeaderboard(collection).then(data => {
+        list.innerHTML = "";
+        for (let i = 0; i < 10; i++) {
+            let d = document.createElement("div");
+            if (data[i]) {
+                let cls = i==0?"gold":i==1?"silver":i==2?"bronze":"normal";
+                let medal = i==0?"🥇":i==1?"🥈":i==2?"🥉":"#"+(i+1);
+                d.className = "item "+cls;
+                d.innerHTML = `<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`;
+            } else {
+                d.className = "item empty";
+                d.innerHTML = `<span>#${i+1} — Libre</span><span>—</span>`;
+            }
+            list.appendChild(d);
+        }
+        switchScreen(leader);
+    });
+}
+
+// Boutons leaderboard
+function showSeasonLeaderboard() {
+    currentLeaderboard = "season1";
+    displayLeaderboard("leaderboard_season1");
+}
+
+function showAlltimeLeaderboard() {
+    currentLeaderboard = "alltime";
+    displayLeaderboard("leaderboard");
+}
+
+function showLeaderboard() {
+    showSeasonLeaderboard();
+}
+
+// === GAME LOGIC ===
+
 function getHitbox(el, px, py) {
     const r = el.getBoundingClientRect();
-    return {
-        left: r.left + px,
-        right: r.right - px,
-        top: r.top + py,
-        bottom: r.bottom - py
-    };
+    return { left:r.left+px, right:r.right-px, top:r.top+py, bottom:r.bottom-py };
 }
 
-const rocketSize = { width: 60, height: 80 };
+const rocketSize = { width:60,height:80 };
 const rockImages = [
-    { src: "Roche1.png", width: 50, height: 50 },
-    { src: "Roche2.png", width: 60, height: 50 },
-    { src: "Roche3.png", width: 55, height: 55 },
-    { src: "Roche4.png", width: 50, height: 60 },
-    { src: "Roche5.png", width: 65, height: 50 },
+    {src:"Roche1.png",width:50,height:50},
+    {src:"Roche2.png",width:60,height:50},
+    {src:"Roche3.png",width:55,height:55},
+    {src:"Roche4.png",width:50,height:60},
+    {src:"Roche5.png",width:65,height:50},
 ];
 
 function spawnStars() {
-    stars.forEach(s => s.remove());
-    stars = [];
-    for (let i = 0; i < 120; i++) {
-        let s = document.createElement("div");
-        s.className = "star";
-        s.style.left = Math.random() * innerWidth + "px";
-        s.style.top = Math.random() * innerHeight + "px";
+    stars.forEach(s=>s.remove()); stars=[];
+    for(let i=0;i<120;i++){
+        let s=document.createElement("div");
+        s.className="star";
+        s.style.left=Math.random()*innerWidth+"px";
+        s.style.top=Math.random()*innerHeight+"px";
         game.appendChild(s);
         stars.push(s);
     }
 }
 
 function moveStars() {
-    stars.forEach(s => {
-        let t = parseFloat(s.style.top);
-        t += 2;
-        if (t > innerHeight) t = 0;
-        s.style.top = t + "px";
+    stars.forEach(s=>{
+        let t=parseFloat(s.style.top);
+        t+=2;
+        if(t>innerHeight)t=0;
+        s.style.top=t+"px";
     });
-    if (!gameOver) requestAnimationFrame(moveStars);
+    if(!gameOver) requestAnimationFrame(moveStars);
 }
 
-// Score loop
 function loopScore() {
     clearInterval(scoreInterval);
-    scoreInterval = setInterval(() => {
-        if (gameOver) return;
-        score += pointMultiplier;
-        scoreTxt.textContent = "Score : " + score;
-
-        let thresholds = [100, 250, 500, 1000];
-        if (score >= 1500) {
-            let extra = Math.floor((score - 1500) / 500);
-            for (let i = 0; i <= extra; i++) thresholds.push(1500 + i * 500);
+    scoreInterval=setInterval(()=>{
+        if(gameOver)return;
+        score+=pointMultiplier;
+        scoreTxt.textContent="Score : "+score;
+        let thresholds=[100,250,500,1000];
+        if(score>=1500){
+            let extra=Math.floor((score-1500)/500);
+            for(let i=0;i<=extra;i++)thresholds.push(1500+i*500);
         }
-
-        thresholds.forEach(t => {
-            if (score >= t && !activatedThresholds.has(t)) {
+        thresholds.forEach(t=>{
+            if(score>=t&&!activatedThresholds.has(t)){
                 activatedThresholds.add(t);
-                speedMultiplier *= 2;
-                pointMultiplier *= 2;
-                speed = baseSpeed * speedMultiplier;
-                spawnDelay = Math.max(120, 800 / speedMultiplier);
+                speedMultiplier*=2;
+                pointMultiplier*=2;
+                speed=baseSpeed*speedMultiplier;
+                spawnDelay=Math.max(120,800/speedMultiplier);
             }
         });
-    }, 250);
+    },250);
 }
 
-let leftPressed = false, rightPressed = false;
-setInterval(() => {
-    if (gameOver) return;
-    if (leftPressed) x -= 6;
-    if (rightPressed) x += 6;
-    x = Math.max(0, Math.min(innerWidth - rocketSize.width, x));
-    rocket.style.left = x + "px";
-}, 16);
+let leftPressed=false,rightPressed=false;
+setInterval(()=>{
+    if(gameOver)return;
+    if(leftPressed)x-=6;
+    if(rightPressed)x+=6;
+    x=Math.max(0,Math.min(innerWidth-rocketSize.width,x));
+    rocket.style.left=x+"px";
+},16);
 
-document.addEventListener("keydown", e => {
-    if (e.key === "ArrowLeft") leftPressed = true;
-    if (e.key === "ArrowRight") rightPressed = true;
-});
-document.addEventListener("keyup", e => {
-    if (e.key === "ArrowLeft") leftPressed = false;
-    if (e.key === "ArrowRight") rightPressed = false;
-});
+document.addEventListener("keydown",e=>{if(e.key==="ArrowLeft")leftPressed=true;if(e.key==="ArrowRight")rightPressed=true;});
+document.addEventListener("keyup",e=>{if(e.key==="ArrowLeft")leftPressed=false;if(e.key==="ArrowRight")rightPressed=false;});
 
-const leftBtn = document.getElementById("leftBtn");
-const rightBtn = document.getElementById("rightBtn");
-["touchstart", "mousedown"].forEach(ev => {
-    leftBtn.addEventListener(ev, e => { e.preventDefault(); leftPressed = true; });
-    rightBtn.addEventListener(ev, e => { e.preventDefault(); rightPressed = true; });
-});
-["touchend", "mouseup", "mouseleave"].forEach(ev => {
-    leftBtn.addEventListener(ev, () => leftPressed = false);
-    rightBtn.addEventListener(ev, () => rightPressed = false);
-});
+["touchstart","mousedown"].forEach(ev=>{document.getElementById("leftBtn").addEventListener(ev,e=>{e.preventDefault();leftPressed=true});document.getElementById("rightBtn").addEventListener(ev,e=>{e.preventDefault();rightPressed=true})});
+["touchend","mouseup","mouseleave"].forEach(ev=>{document.getElementById("leftBtn").addEventListener(ev,()=>leftPressed=false);document.getElementById("rightBtn").addEventListener(ev,()=>rightPressed=false)});
 
-// PLAY
-function play() {
-    score = 0;
-    speedMultiplier = 1;
-    pointMultiplier = 1;
-    speed = baseSpeed;
-    spawnDelay = 800;
-    activatedThresholds = new Set();
-    gameOver = false;
-    x = innerWidth / 2 - rocketSize.width / 2;
-    rocket.style.left = x + "px";
-    scoreTxt.textContent = "Score : 0";
-    gameover.style.display = "none";
-    document.querySelectorAll(".rock").forEach(r => r.remove());
-    rockIntervals.forEach(int => clearInterval(int));
-    rockIntervals = [];
-    spawnStars();
-    moveStars();
-    switchScreen(game);
-    loopScore();
-    spawnRock();
+function play(){
+    score=0;speedMultiplier=1;pointMultiplier=1;speed=baseSpeed;spawnDelay=800;activatedThresholds=new Set();
+    gameOver=false;x=innerWidth/2-rocketSize.width/2;rocket.style.left=x+"px";
+    scoreTxt.textContent="Score : 0"; gameover.style.display="none";
+    document.querySelectorAll(".rock").forEach(r=>r.remove());
+    rockIntervals.forEach(int=>clearInterval(int)); rockIntervals=[];
+    spawnStars(); moveStars(); switchScreen(game); loopScore(); spawnRock();
 }
 
-// ROCK SPAWN
-function spawnRock() {
-    if (gameOver) return;
-    let r = document.createElement("img");
-    let type = rockImages[Math.floor(Math.random() * rockImages.length)];
-    r.src = type.src;
-    r.className = "rock";
-    r.style.width = type.width + "px";
-    r.style.height = type.height + "px";
-    r.style.left = Math.random() * (innerWidth - type.width) + "px";
-    r.style.top = "-60px";
-    game.appendChild(r);
+function spawnRock(){
+    if(gameOver)return;
+    let r=document.createElement("img");
+    let type=rockImages[Math.floor(Math.random()*rockImages.length)];
+    r.src=type.src; r.className="rock"; r.style.width=type.width+"px"; r.style.height=type.height+"px";
+    r.style.left=Math.random()*(innerWidth-type.width)+"px"; r.style.top="-60px"; game.appendChild(r);
 
-    let fall = setInterval(() => {
-        if (gameOver) { r.remove(); clearInterval(fall); return; }
-        r.style.top = parseInt(r.style.top) + speed + "px";
-
-        const rockBox = getHitbox(r, 8, 8);
-        const rocketBox = getHitbox(rocket, 14, 12);
-
-        if (
-            rockBox.bottom > rocketBox.top &&
-            rockBox.top < rocketBox.bottom &&
-            rockBox.left < rocketBox.right &&
-            rockBox.right > rocketBox.left
-        ) {
-            r.remove();
-            clearInterval(fall);
-            endGame();
+    let fall=setInterval(()=>{
+        if(gameOver){r.remove();clearInterval(fall);return;}
+        r.style.top=parseInt(r.style.top)+speed+"px";
+        const rockBox=getHitbox(r,8,8); const rocketBox=getHitbox(rocket,14,12);
+        if(rockBox.bottom>rocketBox.top&&rockBox.top<rocketBox.bottom&&rockBox.left<rocketBox.right&&rockBox.right>rocketBox.left){
+            r.remove(); clearInterval(fall); endGame();
         }
-
-        if (parseInt(r.style.top) > innerHeight) {
-            r.remove();
-            clearInterval(fall);
-        }
-    }, 20);
+        if(parseInt(r.style.top)>innerHeight){r.remove();clearInterval(fall);}
+    },20);
 
     rockIntervals.push(fall);
-    setTimeout(spawnRock, spawnDelay);
+    setTimeout(spawnRock,spawnDelay);
 }
 
-// END GAME
-async function endGame() {
-    gameOver = true;
-    clearInterval(scoreInterval);
-    rockIntervals.forEach(int => clearInterval(int));
-    rockIntervals = [];
-    finalScore.textContent = "Score : " + score;
-    await sendScore(pseudoInput.value || "Anonyme", score);
-    let best = localStorage.getItem("bestScore") || 0;
-    if (score > best) localStorage.setItem("bestScore", score);
-    gameover.style.display = "flex";
-    updateBest();
+async function endGame(){
+    gameOver=true;
+    clearInterval(scoreInterval); rockIntervals.forEach(int=>clearInterval(int)); rockIntervals=[];
+    finalScore.textContent="Score : "+score;
+    await sendScore(pseudoInput.value||"Anonyme",score);
+    let best=localStorage.getItem("bestScore")||0;
+    if(score>best)localStorage.setItem("bestScore",score);
+    gameover.style.display="flex"; updateBest();
 }
 
-// LEADERBOARD DISPLAY 
-async function displayLeaderboard(collection) {
-    list.innerHTML = "";
-    const data = await fetchLeaderboard(collection);
+function updateBest(){ bestTxt.textContent="Meilleur score : "+(localStorage.getItem("bestScore")||0); }
+function goHome(){ switchScreen(home); }
+function switchScreen(s){ [home,game,leader].forEach(e=>e.classList.remove("active")); s.classList.add("active"); }
 
-    for (let i = 0; i < 10; i++) {
-        let d = document.createElement("div");
-        if (data[i]) {
-            let cls = i == 0 ? "gold" : i == 1 ? "silver" : i == 2 ? "bronze" : "normal";
-            let medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "#" + (i + 1);
-            d.className = "item " + cls;
-            d.innerHTML = `<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`;
-        } else {
-            d.className = "item empty";
-            d.innerHTML = `<span>#${i + 1} — Libre</span><span>—</span>`;
-        }
-        list.appendChild(d);
-    }
-    switchScreen(leader);
-}
-
-// LEADERBOARD BUTTONS
-function showSeasonLeaderboard() {
-    currentLeaderboard = "season";
-    displayLeaderboard("leaderboard_season");
-}
-function showAlltimeLeaderboard() {
-    currentLeaderboard = "alltime";
-    displayLeaderboard("leaderboard_all_time");
-}
-
-// DEFAULT
-function showLeaderboard() {
-    showSeasonLeaderboard();
-}
-
-// UTILS
-function updateBest() {
-    bestTxt.textContent = "Meilleur score : " + (localStorage.getItem("bestScore") || 0);
-}
-
-function goHome() { switchScreen(home); }
-function switchScreen(s) {
-    [home, game, leader].forEach(e => e.classList.remove("active"));
-    s.classList.add("active");
-}
 </script>
 </body>
 </html>
+
