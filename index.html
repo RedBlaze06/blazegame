@@ -6,15 +6,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <style>
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin:0; padding:0; }
+
 body {
-    margin: 0;
     background: black;
     color: white;
     font-family: Arial, sans-serif;
     overflow: hidden;
     touch-action: none;
 }
+
 .screen {
     position: absolute;
     inset: 0;
@@ -24,112 +25,71 @@ body {
     justify-content: center;
     gap: 20px;
 }
+
 .active { display: flex; }
 
 /* ACCUEIL */
 #home-screen {
     background: linear-gradient(to top, rgba(0,0,0,.7), rgba(0,0,0,.2)),
-        url("https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1600&q=80") center/cover no-repeat;
+                url("https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1600&q=80") center/cover no-repeat;
 }
+
 #title { font-size: 42px; text-shadow: 0 0 15px white; }
-input, button {
-    padding: 12px 20px;
-    font-size: 18px;
-    border-radius: 10px;
-    border: none;
-}
-button {
-    background: #2196f3;
-    color: white;
-    cursor: pointer;
-}
-#best { position: absolute; bottom: 40px; left: 20px; }
-#author { position: absolute; bottom: 10px; left: 20px; font-size: 14px; color: #aaa; }
+input, button { padding: 12px 20px; font-size: 18px; border-radius: 10px; border:none; }
+button { background: #2196f3; color:white; cursor:pointer; }
+#best { position:absolute; bottom:40px; left:20px; }
+#author { position:absolute; bottom:10px; left:20px; font-size:14px; color:#aaa; }
 
 /* CLASSEMENT */
 #leaderboard-screen {
     background: linear-gradient(180deg,#0f2027,#203a43,#2c5364);
-    padding-top: 30px;
-    gap: 10px;
+    padding-top:30px;
+    gap:10px;
     flex-direction: column;
+    align-items:center;
 }
-#leaderboard-buttons {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-#leaderboard-buttons button {
-    padding: 8px 16px;
-    font-size: 16px;
-}
-#leaderboard-list { width: 320px; }
-.item {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    margin: 6px 0;
-    border-radius: 12px;
-}
-.gold { background: linear-gradient(90deg,#ffd700,#ffb300); color: black; }
-.silver { background: linear-gradient(90deg,#cfd8dc,#b0bec5); color: black; }
-.bronze { background: linear-gradient(90deg,#cd7f32,#a97142); color: black; }
+#leaderboard-buttons { display:flex; gap:10px; margin-bottom:10px; }
+#leaderboard-buttons button { padding:8px 16px; font-size:16px; }
+#leaderboard-list { width:320px; }
+.item { display:flex; justify-content:space-between; padding:10px; margin:6px 0; border-radius:12px; }
+.gold { background: linear-gradient(90deg,#ffd700,#ffb300); color:black; }
+.silver { background: linear-gradient(90deg,#cfd8dc,#b0bec5); color:black; }
+.bronze { background: linear-gradient(90deg,#cd7f32,#a97142); color:black; }
 .normal { background: rgba(255,255,255,.15); }
-.empty { border: 2px dashed rgba(255,255,255,.3); opacity: .5; }
+.empty { border:2px dashed rgba(255,255,255,.3); opacity:.5; }
 
 /* JEU */
-#game-screen { background: black; overflow: hidden; }
-.star {
-    position: absolute;
-    width: 2px;
-    height: 2px;
-    background: white;
-    opacity: .8;
-    pointer-events: none;
-}
-.rocket {
-    position: absolute;
-    bottom: 60px;
-    width: 60px;
-    height: 80px;
-}
-.rocket img { width: 100%; height: 100%; }
-.rock { position: absolute; pointer-events: none; }
-#score { position: absolute; top: 10px; left: 10px; font-size: 22px; }
+#game-screen { background:black; overflow:hidden; }
+.star { position:absolute; width:2px; height:2px; background:white; opacity:.8; pointer-events:none; }
+.rocket { position:absolute; bottom:60px; width:60px; height:80px; }
+.rocket img { width:100%; height:100%; }
+.rock { position:absolute; pointer-events:none; }
+#score { position:absolute; top:10px; left:10px; font-size:22px; }
 
 /* GAME OVER */
 #gameover {
-    position: absolute;
-    inset: 0;
+    position:absolute; inset:0;
     background: rgba(0,0,0,.85);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
 }
 
 /* CONTROLES MOBILE */
 #mobile-controls {
-    position: absolute;
-    bottom: 20px;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 20px;
+    position:absolute; bottom:20px; left:0; right:0;
+    display:flex; justify-content:space-between; padding:0 20px;
 }
 #mobile-controls button {
-    width: 80px;
-    height: 80px;
-    font-size: 32px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.2);
-    color: white;
+    width:80px; height:80px; font-size:32px; border-radius:50%;
+    background: rgba(255,255,255,.2); color:white;
 }
 </style>
 </head>
-
 <body>
 
+<!-- ACCUEIL -->
 <div id="home-screen" class="screen active">
     <div id="title">FUSÉE INFINITY</div>
     <input id="pseudo" placeholder="Ton pseudo">
@@ -139,6 +99,7 @@ button {
     <div id="author">Osrin P</div>
 </div>
 
+<!-- CLASSEMENT -->
 <div id="leaderboard-screen" class="screen">
     <h1>🏆 CLASSEMENT</h1>
     <div id="leaderboard-buttons">
@@ -149,11 +110,10 @@ button {
     <button onclick="goHome()">Retour</button>
 </div>
 
+<!-- JEU -->
 <div id="game-screen" class="screen">
     <div id="score">Score : 0</div>
-    <div class="rocket" id="rocket">
-        <img src="Fusee.png" alt="Fusée">
-    </div>
+    <div class="rocket" id="rocket"><img src="Fusee.png" alt="Fusée"></div>
     <div id="mobile-controls">
         <button id="leftBtn">⬅️</button>
         <button id="rightBtn">➡️</button>
@@ -165,10 +125,12 @@ button {
     </div>
 </div>
 
+<!-- FIREBASE SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore-compat.js"></script>
 
 <script>
+/* ELEMENTS */
 const home = document.getElementById("home-screen");
 const game = document.getElementById("game-screen");
 const leader = document.getElementById("leaderboard-screen");
@@ -180,15 +142,19 @@ const gameover = document.getElementById("gameover");
 const finalScore = document.getElementById("finalScore");
 const pseudoInput = document.getElementById("pseudo");
 
-let x = innerWidth / 2 - 30;
-let score = 0;
-let baseSpeed = 4, speed = 4, spawnDelay = 800;
-let speedMultiplier = 1, pointMultiplier = 1;
+/* GAME VARIABLES */
+let x = innerWidth/2-30, score=0, baseSpeed=4, speed=4, spawnDelay=800;
+let speedMultiplier=1, pointMultiplier=1;
 let activatedThresholds = new Set();
-let gameOver = false;
-let scoreInterval = null;
-let rockIntervals = [];
-let stars = [];
+let gameOver=false, scoreInterval=null, rockIntervals=[], stars=[];
+const rocketSize={width:60,height:80};
+const rockImages=[
+    {src:"Roche1.png", width:50,height:50},
+    {src:"Roche2.png", width:60,height:50},
+    {src:"Roche3.png", width:55,height:55},
+    {src:"Roche4.png", width:50,height:60},
+    {src:"Roche5.png", width:65,height:50}
+];
 
 /* FIREBASE */
 const firebaseConfig = {
@@ -201,121 +167,172 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+let currentLeaderboard = "season1";
 
-// Leaderboard actif
-let currentLeaderboard = "leaderboard_season1"; // saison par défaut
-
-// Envoi score
-async function sendScore(name, score) {
-    try {
-        // Ajoute toujours dans all-time
-        await db.collection("leaderboard").add({
-            name, score, date: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        // Ajoute dans saison actuelle
-        await db.collection("leaderboard_season1").add({
-            name, score, date: firebase.firestore.FieldValue.serverTimestamp()
-        });
-    } catch (err) {
-        console.error(err);
-    }
+/* SCORE / LEADERBOARD */
+async function sendScore(name, score){
+    try{
+        await db.collection("leaderboard").add({name,score,date:firebase.firestore.FieldValue.serverTimestamp()});
+        await db.collection("leaderboard_season1").add({name,score,date:firebase.firestore.FieldValue.serverTimestamp()});
+    }catch(err){console.error(err);}
 }
 
-// Récupération leaderboard
-async function fetchLeaderboard(collection) {
-    try {
+async function fetchLeaderboard(collection){
+    try{
         const snapshot = await db.collection(collection)
-            .orderBy("score", "desc")
-            .limit(10)
-            .get();
-        let data = [];
-        snapshot.forEach(doc => data.push(doc.data()));
+            .orderBy("score","desc").limit(10).get();
+        const data=[];
+        snapshot.forEach(doc=>data.push(doc.data()));
         return data;
-    } catch (err) {
-        console.error(err);
-        return [];
-    }
+    }catch(err){console.error(err); return [];}
 }
 
-// Affichage leaderboard
-async function displayLeaderboard() {
-    list.innerHTML = "";
-    const data = await fetchLeaderboard(currentLeaderboard);
-    for (let i = 0; i < 10; i++) {
-        let d = document.createElement("div");
-        if (data[i]) {
-            let cls = i==0?"gold":i==1?"silver":i==2?"bronze":"normal";
-            let medal = i==0?"🥇":i==1?"🥈":i==2?"🥉":"#"+(i+1);
-            d.className = "item "+cls;
-            d.innerHTML = `<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`;
-        } else {
-            d.className = "item empty";
-            d.innerHTML = `<span>#${i+1} — Libre</span><span>—</span>`;
+/* UTIL */
+function updateBest(){ bestTxt.textContent="Meilleur score : "+(localStorage.getItem("bestScore")||0); }
+function goHome(){ switchScreen(home); }
+function switchScreen(s){ [home,game,leader].forEach(e=>e.classList.remove("active")); s.classList.add("active"); }
+
+/* STAR FIELD */
+function spawnStars(){
+    stars.forEach(s=>s.remove());
+    stars=[];
+    for(let i=0;i<120;i++){
+        let s=document.createElement("div");
+        s.className="star";
+        s.style.left=Math.random()*innerWidth+"px";
+        s.style.top=Math.random()*innerHeight+"px";
+        game.appendChild(s);
+        stars.push(s);
+    }
+}
+function moveStars(){
+    stars.forEach(s=>{
+        let t=parseFloat(s.style.top)+2;
+        if(t>innerHeight) t=0;
+        s.style.top=t+"px";
+    });
+    if(!gameOver) requestAnimationFrame(moveStars);
+}
+
+/* GAME LOOP */
+function loopScore(){
+    clearInterval(scoreInterval);
+    scoreInterval=setInterval(()=>{
+        if(gameOver) return;
+        score+=pointMultiplier;
+        scoreTxt.textContent="Score : "+score;
+
+        let thresholds=[100,250,500,1000];
+        if(score>=1500){
+            let extra=Math.floor((score-1500)/500);
+            for(let i=0;i<=extra;i++) thresholds.push(1500+i*500);
+        }
+        thresholds.forEach(t=>{
+            if(score>=t && !activatedThresholds.has(t)){
+                activatedThresholds.add(t);
+                speedMultiplier*=2;
+                pointMultiplier*=2;
+                speed=baseSpeed*speedMultiplier;
+                spawnDelay=Math.max(120,800/speedMultiplier);
+            }
+        });
+    },250);
+}
+
+/* MOVEMENT */
+let leftPressed=false, rightPressed=false;
+setInterval(()=>{
+    if(gameOver) return;
+    if(leftPressed) x-=6;
+    if(rightPressed) x+=6;
+    x=Math.max(0,Math.min(innerWidth-rocketSize.width,x));
+    rocket.style.left=x+"px";
+},16);
+
+document.addEventListener("keydown", e=>{ if(e.key==="ArrowLeft") leftPressed=true; if(e.key==="ArrowRight") rightPressed=true; });
+document.addEventListener("keyup", e=>{ if(e.key==="ArrowLeft") leftPressed=false; if(e.key==="ArrowRight") rightPressed=false; });
+
+const leftBtn=document.getElementById("leftBtn");
+const rightBtn=document.getElementById("rightBtn");
+["touchstart","mousedown"].forEach(ev=>{ leftBtn.addEventListener(ev,e=>{e.preventDefault();leftPressed=true;}); rightBtn.addEventListener(ev,e=>{e.preventDefault();rightPressed=true;}); });
+["touchend","mouseup","mouseleave"].forEach(ev=>{ leftBtn.addEventListener(ev,()=>leftPressed=false); rightBtn.addEventListener(ev,()=>rightPressed=false); });
+
+/* PLAY */
+function play(){
+    score=0; speedMultiplier=1; pointMultiplier=1; speed=baseSpeed; spawnDelay=800;
+    activatedThresholds=new Set(); gameOver=false; x=innerWidth/2-rocketSize.width/2;
+    rocket.style.left=x+"px"; scoreTxt.textContent="Score : 0";
+    gameover.style.display="none";
+    document.querySelectorAll(".rock").forEach(r=>r.remove());
+    rockIntervals.forEach(int=>clearInterval(int)); rockIntervals=[];
+    spawnStars(); moveStars(); switchScreen(game);
+    loopScore(); spawnRock();
+}
+
+/* SPAWN ROCKS */
+function getHitbox(el,px,py){ const r=el.getBoundingClientRect(); return {left:r.left+px,right:r.right-px,top:r.top+py,bottom:r.bottom-py}; }
+function spawnRock(){
+    if(gameOver) return;
+    let r=document.createElement("img");
+    let type=rockImages[Math.floor(Math.random()*rockImages.length)];
+    r.src=type.src; r.className="rock"; r.style.width=type.width+"px"; r.style.height=type.height+"px";
+    r.style.left=Math.random()*(innerWidth-type.width)+"px"; r.style.top="-60px";
+    game.appendChild(r);
+
+    let fall=setInterval(()=>{
+        if(gameOver){ r.remove(); clearInterval(fall); return; }
+        r.style.top=parseInt(r.style.top)+speed+"px";
+
+        const rockBox=getHitbox(r,8,8), rocketBox=getHitbox(rocket,14,12);
+        if(rockBox.bottom>rocketBox.top && rockBox.top<rocketBox.bottom && rockBox.left<rocketBox.right && rockBox.right>rocketBox.left){
+            r.remove(); clearInterval(fall); endGame();
+        }
+        if(parseInt(r.style.top)>innerHeight){ r.remove(); clearInterval(fall); }
+    },20);
+
+    rockIntervals.push(fall);
+    setTimeout(spawnRock,spawnDelay);
+}
+
+/* END GAME */
+async function endGame(){
+    gameOver=true;
+    clearInterval(scoreInterval);
+    rockIntervals.forEach(int=>clearInterval(int)); rockIntervals=[];
+    finalScore.textContent="Score : "+score;
+    await sendScore(pseudoInput.value||"Anonyme",score);
+    let best=localStorage.getItem("bestScore")||0;
+    if(score>best) localStorage.setItem("bestScore",score);
+    gameover.style.display="flex";
+    updateBest();
+}
+
+/* LEADERBOARD DISPLAY */
+async function displayLeaderboard(collection){
+    list.innerHTML="";
+    const data=await fetchLeaderboard(collection);
+    for(let i=0;i<10;i++){
+        let d=document.createElement("div");
+        if(data[i]){
+            let cls=i==0?"gold":i==1?"silver":i==2?"bronze":"normal";
+            let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":"#"+(i+1);
+            d.className="item "+cls;
+            d.innerHTML=`<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`;
+        }else{
+            d.className="item empty";
+            d.innerHTML=`<span>#${i+1} — Libre</span><span>—</span>`;
         }
         list.appendChild(d);
     }
     switchScreen(leader);
 }
 
-// Boutons leaderboard
-function showSeasonLeaderboard() {
-    currentLeaderboard = "leaderboard_season1";
-    displayLeaderboard();
-}
-function showAlltimeLeaderboard() {
-    currentLeaderboard = "leaderboard";
-    displayLeaderboard();
-}
-function showLeaderboard() { showSeasonLeaderboard(); }
+/* BUTTONS */
+function showLeaderboard(){ showSeasonLeaderboard(); }
+function showSeasonLeaderboard(){ currentLeaderboard="season1"; displayLeaderboard("leaderboard_season1"); }
+function showAlltimeLeaderboard(){ currentLeaderboard="alltime"; displayLeaderboard("leaderboard"); }
 
-/* ----- JEU ----- */
-function getHitbox(el, px, py) {
-    const r = el.getBoundingClientRect();
-    return { left: r.left+px, right: r.right-px, top: r.top+py, bottom: r.bottom-py };
-}
-const rocketSize = { width: 60, height: 80 };
-const rockImages = [
-    {src:"Roche1.png", width:50,height:50},
-    {src:"Roche2.png", width:60,height:50},
-    {src:"Roche3.png", width:55,height:55},
-    {src:"Roche4.png", width:50,height:60},
-    {src:"Roche5.png", width:65,height:50},
-];
-function spawnStars(){stars.forEach(s=>s.remove());stars=[];for(let i=0;i<120;i++){let s=document.createElement("div");s.className="star";s.style.left=Math.random()*innerWidth+"px";s.style.top=Math.random()*innerHeight+"px";game.appendChild(s);stars.push(s);}}
-function moveStars(){stars.forEach(s=>{let t=parseFloat(s.style.top);t+=2;if(t>innerHeight)t=0;s.style.top=t+"px";});if(!gameOver)requestAnimationFrame(moveStars);}
-function loopScore(){clearInterval(scoreInterval);scoreInterval=setInterval(()=>{if(gameOver)return;score+=pointMultiplier;scoreTxt.textContent="Score : "+score;let thresholds=[100,250,500,1000];if(score>=1500){let extra=Math.floor((score-1500)/500);for(let i=0;i<=extra;i++)thresholds.push(1500+i*500);}thresholds.forEach(t=>{if(score>=t&&!activatedThresholds.has(t)){activatedThresholds.add(t);speedMultiplier*=2;pointMultiplier*=2;speed=baseSpeed*speedMultiplier;spawnDelay=Math.max(120,800/speedMultiplier);}});},250);}
-let leftPressed=false,rightPressed=false;
-setInterval(()=>{if(gameOver)return;if(leftPressed)x-=6;if(rightPressed)x+=6;x=Math.max(0,Math.min(innerWidth-rocketSize.width,x));rocket.style.left=x+"px";},16);
-document.addEventListener("keydown",e=>{if(e.key==="ArrowLeft")leftPressed=true;if(e.key==="ArrowRight")rightPressed=true;});
-document.addEventListener("keyup",e=>{if(e.key==="ArrowLeft")leftPressed=false;if(e.key==="ArrowRight")rightPressed=false;});
-["touchstart","mousedown"].forEach(ev=>{document.getElementById("leftBtn").addEventListener(ev,e=>{e.preventDefault();leftPressed=true});document.getElementById("rightBtn").addEventListener(ev,e=>{e.preventDefault();rightPressed=true});});
-["touchend","mouseup","mouseleave"].forEach(ev=>{document.getElementById("leftBtn").addEventListener(ev,()=>leftPressed=false);document.getElementById("rightBtn").addEventListener(ev,()=>rightPressed=false);});
-
-function play(){
-    score=0;speedMultiplier=1;pointMultiplier=1;speed=baseSpeed;spawnDelay=800;activatedThresholds=new Set();gameOver=false;x=innerWidth/2-rocketSize.width/2;rocket.style.left=x+"px";
-    scoreTxt.textContent="Score : 0";gameover.style.display="none";document.querySelectorAll(".rock").forEach(r=>r.remove());rockIntervals.forEach(int=>clearInterval(int));rockIntervals=[];
-    spawnStars();moveStars();switchScreen(game);loopScore();spawnRock();
-}
-function spawnRock(){
-    if(gameOver)return;
-    let r=document.createElement("img");
-    let type=rockImages[Math.floor(Math.random()*rockImages.length)];
-    r.src=type.src;r.className="rock";r.style.width=type.width+"px";r.style.height=type.height+"px";
-    r.style.left=Math.random()*(innerWidth-type.width)+"px";r.style.top="-60px";game.appendChild(r);
-    let fall=setInterval(()=>{if(gameOver){r.remove();clearInterval(fall);return;}
-        r.style.top=parseInt(r.style.top)+speed+"px";
-        const rockBox=getHitbox(r,8,8),rocketBox=getHitbox(rocket,14,12);
-        if(rockBox.bottom>rocketBox.top && rockBox.top<rocketBox.bottom && rockBox.left<rocketBox.right && rockBox.right>rocketBox.left){r.remove();clearInterval(fall);endGame();}
-        if(parseInt(r.style.top)>innerHeight){r.remove();clearInterval(fall);}
-    },20);
-    rockIntervals.push(fall);setTimeout(spawnRock,spawnDelay);
-}
-async function endGame(){gameOver=true;clearInterval(scoreInterval);rockIntervals.forEach(int=>clearInterval(int));rockIntervals=[];finalScore.textContent="Score : "+score;await sendScore(pseudoInput.value||"Anonyme",score);let best=localStorage.getItem("bestScore")||0;if(score>best)localStorage.setItem("bestScore",score);gameover.style.display="flex";updateBest();}
-function updateBest(){bestTxt.textContent="Meilleur score : "+(localStorage.getItem("bestScore")||0);}
-function goHome(){switchScreen(home);}
-function switchScreen(s){[home,game,leader].forEach(e=>e.classList.remove("active"));s.classList.add("active");}
 </script>
-
 </body>
 </html>
 
