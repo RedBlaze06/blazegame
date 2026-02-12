@@ -226,9 +226,42 @@ const db = firebase.firestore();
 // Active leaderboard par défaut : saison
 let currentLeaderboard = "season"; // season ou alltime
 
+/* -------------------- NOUVEAU : COPIE DES SCORES -------------------- */
+async function copyLeaderboardTo(collectionName) {
+    try {
+        const snapshot = await db.collection("leaderboard").get();
+        for (const doc of snapshot.docs) {
+            const data = doc.data();
+            await db.collection(collectionName).add({
+                name: data.name || "Anonyme",
+                score: Number(data.score) || 0,
+                date: data.date || firebase.firestore.FieldValue.serverTimestamp()
+            });
+        }
+        console.log(`✅ Scores copiés vers ${collectionName}`);
+    } catch (err) {
+        console.error("Erreur copie leaderboard :", err);
+    }
+}
+
+// Fonction pour démarrer une nouvelle saison
+async function startNewSeason(seasonNumber) {
+    // Copie des scores actuels vers All Time
+    await copyLeaderboardTo("leaderboard_all_time");
+
+    // Copie des scores actuels vers la saison en cours
+    const seasonCollection = "leaderboard_season" + seasonNumber;
+    await copyLeaderboardTo(seasonCollection);
+
+    console.log(`✅ Saison ${seasonNumber} initialisée`);
+}
+
+/* -------------------- FIN NOUVEAU -------------------- */
+
 async function sendScore(name, score) {
     try {
-        await db.collection("leaderboard_alltime").add({
+        // Toujours envoyer dans all time et saison en cours
+        await db.collection("leaderboard_all_time").add({
             name,
             score,
             date: firebase.firestore.FieldValue.serverTimestamp()
@@ -435,40 +468,25 @@ async function endGame() {
 }
 
 // LEADERBOARD DISPLAY 
-async function displayLeaderboard() {
+async function displayLeaderboard(collection) {
     list.innerHTML = "";
-    try {
-        const snapshot = await db.collection("leaderboard").get();
-        let data = [];
-        snapshot.forEach(doc => {
-            let d = doc.data();
-            d.score = Number(d.score) || 0;
-            data.push(d);
-        });
+    const data = await fetchLeaderboard(collection);
 
-        data.sort((a, b) => b.score - a.score);
-
-        // Afficher les 10 premiers
-        for (let i = 0; i < 10; i++) {
-            let d = document.createElement("div");
-            if (data[i]) {
-                let cls = i == 0 ? "gold" : i == 1 ? "silver" : i == 2 ? "bronze" : "normal";
-                let medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "#" + (i + 1);
-                d.className = "item " + cls;
-                d.innerHTML = `<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`;
-            } else {
-                d.className = "item empty";
-                d.innerHTML = `<span>#${i + 1} — Libre</span><span>—</span>`;
-            }
-            list.appendChild(d);
+    for (let i = 0; i < 10; i++) {
+        let d = document.createElement("div");
+        if (data[i]) {
+            let cls = i == 0 ? "gold" : i == 1 ? "silver" : i == 2 ? "bronze" : "normal";
+            let medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "#" + (i + 1);
+            d.className = "item " + cls;
+            d.innerHTML = `<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`;
+        } else {
+            d.className = "item empty";
+            d.innerHTML = `<span>#${i + 1} — Libre</span><span>—</span>`;
         }
-
-        switchScreen(leader);
-    } catch (err) {
-        console.error("Erreur leaderboard :", err);
+        list.appendChild(d);
     }
+    switchScreen(leader);
 }
-
 
 // LEADERBOARD BUTTONS
 function showSeasonLeaderboard() {
@@ -477,7 +495,7 @@ function showSeasonLeaderboard() {
 }
 function showAlltimeLeaderboard() {
     currentLeaderboard = "alltime";
-    displayLeaderboard("leaderboard_alltime");
+    displayLeaderboard("leaderboard_all_time");
 }
 
 // DEFAULT
@@ -495,7 +513,6 @@ function switchScreen(s) {
     [home, game, leader].forEach(e => e.classList.remove("active"));
     s.classList.add("active");
 }
-
 </script>
 </body>
 </html>
