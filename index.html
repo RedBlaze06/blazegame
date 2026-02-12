@@ -434,25 +434,41 @@ async function endGame() {
     updateBest();
 }
 
-// LEADERBOARD DISPLAY
-async function displayLeaderboard(collection) {
+// LEADERBOARD DISPLAY 
+async function displayLeaderboard() {
     list.innerHTML = "";
-    const data = await fetchLeaderboard(collection);
-    for (let i = 0; i < 10; i++) {
-        let d = document.createElement("div");
-        if (data[i]) {
-            let cls = i == 0 ? "gold" : i == 1 ? "silver" : i == 2 ? "bronze" : "normal";
-            let medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "#" + (i + 1);
-            d.className = "item " + cls;
-            d.innerHTML = `<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`;
-        } else {
-            d.className = "item empty";
-            d.innerHTML = `<span>#${i + 1} — Libre</span><span>—</span>`;
+    try {
+        const snapshot = await db.collection("leaderboard").get();
+        let data = [];
+        snapshot.forEach(doc => {
+            let d = doc.data();
+            d.score = Number(d.score) || 0;
+            data.push(d);
+        });
+
+        data.sort((a, b) => b.score - a.score);
+
+        // Afficher les 10 premiers
+        for (let i = 0; i < 10; i++) {
+            let d = document.createElement("div");
+            if (data[i]) {
+                let cls = i == 0 ? "gold" : i == 1 ? "silver" : i == 2 ? "bronze" : "normal";
+                let medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "#" + (i + 1);
+                d.className = "item " + cls;
+                d.innerHTML = `<span>${medal} ${data[i].name}</span><span>${data[i].score}</span>`;
+            } else {
+                d.className = "item empty";
+                d.innerHTML = `<span>#${i + 1} — Libre</span><span>—</span>`;
+            }
+            list.appendChild(d);
         }
-        list.appendChild(d);
+
+        switchScreen(leader);
+    } catch (err) {
+        console.error("Erreur leaderboard :", err);
     }
-    switchScreen(leader);
 }
+
 
 // LEADERBOARD BUTTONS
 function showSeasonLeaderboard() {
