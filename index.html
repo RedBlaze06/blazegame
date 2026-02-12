@@ -61,6 +61,17 @@ button {
     flex-direction: column;
 }
 
+#leaderboard-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+#leaderboard-buttons button {
+    padding: 8px 16px;
+    font-size: 16px;
+}
+
 #leaderboard-list { width: 320px; }
 
 .item {
@@ -148,6 +159,10 @@ button {
 
 <div id="leaderboard-screen" class="screen">
     <h1>🏆 CLASSEMENT</h1>
+    <div id="leaderboard-buttons">
+        <button id="seasonBtn" onclick="showSeasonLeaderboard()">Cette saison</button>
+        <button id="alltimeBtn" onclick="showAlltimeLeaderboard()">Tout le temps</button>
+    </div>
     <div id="leaderboard-list"></div>
     <button onclick="goHome()">Retour</button>
 </div>
@@ -171,7 +186,6 @@ button {
     </div>
 </div>
 
-<!-- FIREBASE SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.6.0/firebase-firestore-compat.js"></script>
 
@@ -209,9 +223,17 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+// Active leaderboard par défaut : saison
+let currentLeaderboard = "season"; // season ou alltime
+
 async function sendScore(name, score) {
     try {
-        await db.collection("leaderboard").add({
+        await db.collection("leaderboard_alltime").add({
+            name,
+            score,
+            date: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        await db.collection("leaderboard_season").add({
             name,
             score,
             date: firebase.firestore.FieldValue.serverTimestamp()
@@ -221,9 +243,9 @@ async function sendScore(name, score) {
     }
 }
 
-async function fetchLeaderboard() {
+async function fetchLeaderboard(collection) {
     try {
-        const snapshot = await db.collection("leaderboard")
+        const snapshot = await db.collection(collection)
             .orderBy("score", "desc")
             .limit(10)
             .get();
@@ -236,6 +258,7 @@ async function fetchLeaderboard() {
     }
 }
 
+// Helpers pour étoiles, collisions...
 function getHitbox(el, px, py) {
     const r = el.getBoundingClientRect();
     return {
@@ -278,6 +301,7 @@ function moveStars() {
     if (!gameOver) requestAnimationFrame(moveStars);
 }
 
+// Score loop
 function loopScore() {
     clearInterval(scoreInterval);
     scoreInterval = setInterval(() => {
@@ -304,7 +328,6 @@ function loopScore() {
 }
 
 let leftPressed = false, rightPressed = false;
-
 setInterval(() => {
     if (gameOver) return;
     if (leftPressed) x -= 6;
@@ -324,17 +347,16 @@ document.addEventListener("keyup", e => {
 
 const leftBtn = document.getElementById("leftBtn");
 const rightBtn = document.getElementById("rightBtn");
-
 ["touchstart", "mousedown"].forEach(ev => {
     leftBtn.addEventListener(ev, e => { e.preventDefault(); leftPressed = true; });
     rightBtn.addEventListener(ev, e => { e.preventDefault(); rightPressed = true; });
 });
-
 ["touchend", "mouseup", "mouseleave"].forEach(ev => {
     leftBtn.addEventListener(ev, () => leftPressed = false);
     rightBtn.addEventListener(ev, () => rightPressed = false);
 });
 
+// PLAY
 function play() {
     score = 0;
     speedMultiplier = 1;
@@ -357,6 +379,7 @@ function play() {
     spawnRock();
 }
 
+// ROCK SPAWN
 function spawnRock() {
     if (gameOver) return;
     let r = document.createElement("img");
@@ -397,6 +420,7 @@ function spawnRock() {
     setTimeout(spawnRock, spawnDelay);
 }
 
+// END GAME
 async function endGame() {
     gameOver = true;
     clearInterval(scoreInterval);
@@ -410,9 +434,10 @@ async function endGame() {
     updateBest();
 }
 
-async function showLeaderboard() {
+// LEADERBOARD DISPLAY
+async function displayLeaderboard(collection) {
     list.innerHTML = "";
-    const data = await fetchLeaderboard();
+    const data = await fetchLeaderboard(collection);
     for (let i = 0; i < 10; i++) {
         let d = document.createElement("div");
         if (data[i]) {
@@ -429,17 +454,32 @@ async function showLeaderboard() {
     switchScreen(leader);
 }
 
+// LEADERBOARD BUTTONS
+function showSeasonLeaderboard() {
+    currentLeaderboard = "season";
+    displayLeaderboard("leaderboard_season");
+}
+function showAlltimeLeaderboard() {
+    currentLeaderboard = "alltime";
+    displayLeaderboard("leaderboard_alltime");
+}
+
+// DEFAULT
+function showLeaderboard() {
+    showSeasonLeaderboard();
+}
+
+// UTILS
 function updateBest() {
     bestTxt.textContent = "Meilleur score : " + (localStorage.getItem("bestScore") || 0);
 }
 
 function goHome() { switchScreen(home); }
-
 function switchScreen(s) {
     [home, game, leader].forEach(e => e.classList.remove("active"));
     s.classList.add("active");
 }
-</script>
 
+</script>
 </body>
 </html>
