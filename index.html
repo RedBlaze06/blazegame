@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>schéma de cellule complète</title>
+<title>Fusée Infinity</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <style>
@@ -25,7 +25,15 @@ body {
     justify-content: center;
     gap: 20px;
 }
-
+#bg-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* remplit tout en gardant les proportions */
+    z-index: -1; /* derrière tout le reste */
+}
 .active { display: flex; }
 
 /* ACCUEIL */
@@ -48,6 +56,7 @@ button { background: #2196f3; color:white; cursor:pointer; }
     flex-direction: column;
     align-items:center;
 }
+
 #leaderboard-buttons { display:flex; gap:10px; margin-bottom:10px; }
 #leaderboard-buttons button { padding:8px 16px; font-size:16px; }
 #leaderboard-list { width:320px; }
@@ -59,7 +68,7 @@ button { background: #2196f3; color:white; cursor:pointer; }
 .empty { border:2px dashed rgba(255,255,255,.3); opacity:.5; }
 
 /* JEU */
-#game-screen { background:black; overflow:hidden; }
+#game-screen { overflow:hidden; }
 .star { position:absolute; width:2px; height:2px; background:white; opacity:.8; pointer-events:none; }
 .rocket { position:absolute; bottom:60px; width:60px; height:80px; }
 .rocket img { width:100%; height:100%; }
@@ -104,7 +113,7 @@ button { background: #2196f3; color:white; cursor:pointer; }
     <h1>🏆 CLASSEMENT</h1>
     <div id="leaderboard-buttons">
         <button onclick="showSeasonLeaderboard()">Saison</button>
-        <button onclick="showAlltimeLeaderboard()">Tout les temps</button>
+        <button onclick="showAlltimeLeaderboard()">Tout le temps</button>
     </div>
     <div id="leaderboard-list"></div>
     <button onclick="goHome()">Retour</button>
@@ -112,6 +121,9 @@ button { background: #2196f3; color:white; cursor:pointer; }
 
 <!-- JEU -->
 <div id="game-screen" class="screen">
+<video id="bg-video" autoplay muted loop playsinline preload="auto">
+    <source src="galaxy.mp4" type="video/mp4">
+</video>
     <div id="score">Score : 0</div>
     <div class="rocket" id="rocket"><img src="Fusee.png" alt="Fusée"></div>
     <div id="mobile-controls">
@@ -143,7 +155,11 @@ const finalScore = document.getElementById("finalScore");
 const pseudoInput = document.getElementById("pseudo");
 
 /* GAME VARIABLES */
-let x = innerWidth/2-30, score=0, baseSpeed=4, speed=4, spawnDelay=800;
+let x = innerWidth/2-30,
+    score=0,
+    baseSpeed=4,
+    speed=4,
+    spawnDelay=800;
 let speedMultiplier=1, pointMultiplier=1;
 let activatedThresholds = new Set();
 let gameOver=false, scoreInterval=null, rockIntervals=[], stars=[];
@@ -167,14 +183,20 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-let currentLeaderboard = "season1";
+let currentLeaderboard = "leaderboard_season2";
 
 /* SCORE / LEADERBOARD */
 async function sendScore(name, score){
     try{
-        await db.collection("leaderboard").add({name,score,date:firebase.firestore.FieldValue.serverTimestamp()});
-        await db.collection("leaderboard_season1").add({name,score,date:firebase.firestore.FieldValue.serverTimestamp()});
-    }catch(err){console.error(err);}
+        await db.collection("leaderboard").add({
+            name, score,
+            date: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        await db.collection(currentLeaderboard).add({
+            name, score,
+            date: firebase.firestore.FieldValue.serverTimestamp()
+        });
+    }catch(err){ console.error(err); }
 }
 
 async function fetchLeaderboard(collection){
@@ -184,13 +206,18 @@ async function fetchLeaderboard(collection){
         const data=[];
         snapshot.forEach(doc=>data.push(doc.data()));
         return data;
-    }catch(err){console.error(err); return [];}
+    }catch(err){ console.error(err); return []; }
 }
 
 /* UTIL */
-function updateBest(){ bestTxt.textContent="Meilleur score : "+(localStorage.getItem("bestScore")||0); }
+function updateBest(){ 
+    bestTxt.textContent="Meilleur score : "+(localStorage.getItem("bestScore")||0); 
+}
 function goHome(){ switchScreen(home); }
-function switchScreen(s){ [home,game,leader].forEach(e=>e.classList.remove("active")); s.classList.add("active"); }
+function switchScreen(s){ 
+    [home,game,leader].forEach(e=>e.classList.remove("active"));
+    s.classList.add("active");
+}
 
 /* STAR FIELD */
 function spawnStars(){
@@ -227,6 +254,7 @@ function loopScore(){
             let extra=Math.floor((score-1500)/500);
             for(let i=0;i<=extra;i++) thresholds.push(1500+i*500);
         }
+
         thresholds.forEach(t=>{
             if(score>=t && !activatedThresholds.has(t)){
                 activatedThresholds.add(t);
@@ -249,44 +277,83 @@ setInterval(()=>{
     rocket.style.left=x+"px";
 },16);
 
-document.addEventListener("keydown", e=>{ if(e.key==="ArrowLeft") leftPressed=true; if(e.key==="ArrowRight") rightPressed=true; });
-document.addEventListener("keyup", e=>{ if(e.key==="ArrowLeft") leftPressed=false; if(e.key==="ArrowRight") rightPressed=false; });
+document.addEventListener("keydown", e=>{
+    if(e.key==="ArrowLeft") leftPressed=true;
+    if(e.key==="ArrowRight") rightPressed=true;
+});
+document.addEventListener("keyup", e=>{
+    if(e.key==="ArrowLeft") leftPressed=false;
+    if(e.key==="ArrowRight") rightPressed=false;
+});
 
 const leftBtn=document.getElementById("leftBtn");
 const rightBtn=document.getElementById("rightBtn");
-["touchstart","mousedown"].forEach(ev=>{ leftBtn.addEventListener(ev,e=>{e.preventDefault();leftPressed=true;}); rightBtn.addEventListener(ev,e=>{e.preventDefault();rightPressed=true;}); });
-["touchend","mouseup","mouseleave"].forEach(ev=>{ leftBtn.addEventListener(ev,()=>leftPressed=false); rightBtn.addEventListener(ev,()=>rightPressed=false); });
+["touchstart","mousedown"].forEach(ev=>{
+    leftBtn.addEventListener(ev,e=>{e.preventDefault(); leftPressed=true;});
+    rightBtn.addEventListener(ev,e=>{e.preventDefault(); rightPressed=true;});
+});
+["touchend","mouseup","mouseleave"].forEach(ev=>{
+    leftBtn.addEventListener(ev,()=>leftPressed=false);
+    rightBtn.addEventListener(ev,()=>rightPressed=false);
+});
 
 /* PLAY */
 function play(){
-    score=0; speedMultiplier=1; pointMultiplier=1; speed=baseSpeed; spawnDelay=800;
-    activatedThresholds=new Set(); gameOver=false; x=innerWidth/2-rocketSize.width/2;
-    rocket.style.left=x+"px"; scoreTxt.textContent="Score : 0";
+    score=0;
+    speedMultiplier=1;
+    pointMultiplier=1;
+    speed=baseSpeed;
+    spawnDelay=800;
+    activatedThresholds=new Set();
+    gameOver=false;
+    x=innerWidth/2-rocketSize.width/2;
+    rocket.style.left=x+"px";
+    scoreTxt.textContent="Score : 0";
     gameover.style.display="none";
     document.querySelectorAll(".rock").forEach(r=>r.remove());
-    rockIntervals.forEach(int=>clearInterval(int)); rockIntervals=[];
-    spawnStars(); moveStars(); switchScreen(game);
-    loopScore(); spawnRock();
+    rockIntervals.forEach(int=>clearInterval(int));
+    rockIntervals=[];
+    const bgVideo = document.getElementById("bg-video");
+    bgVideo.currentTime = 0;
+    bgVideo.play();
+    spawnStars();
+    moveStars();
+    switchScreen(game);
+    loopScore();
+    spawnRock();
 }
 
 /* SPAWN ROCKS */
-function getHitbox(el,px,py){ const r=el.getBoundingClientRect(); return {left:r.left+px,right:r.right-px,top:r.top+py,bottom:r.bottom-py}; }
+function getHitbox(el,px,py){ 
+    const r=el.getBoundingClientRect(); 
+    return {left:r.left+px,right:r.right-px,top:r.top+py,bottom:r.bottom-py}; 
+}
+
 function spawnRock(){
     if(gameOver) return;
+
     let r=document.createElement("img");
     let type=rockImages[Math.floor(Math.random()*rockImages.length)];
-    r.src=type.src; r.className="rock"; r.style.width=type.width+"px"; r.style.height=type.height+"px";
-    r.style.left=Math.random()*(innerWidth-type.width)+"px"; r.style.top="-60px";
+    r.src=type.src;
+    r.className="rock";
+    r.style.width=type.width+"px";
+    r.style.height=type.height+"px";
+    r.style.left=Math.random()*(innerWidth-type.width)+"px";
+    r.style.top="-60px";
     game.appendChild(r);
 
     let fall=setInterval(()=>{
         if(gameOver){ r.remove(); clearInterval(fall); return; }
         r.style.top=parseInt(r.style.top)+speed+"px";
 
-        const rockBox=getHitbox(r,8,8), rocketBox=getHitbox(rocket,14,12);
-        if(rockBox.bottom>rocketBox.top && rockBox.top<rocketBox.bottom && rockBox.left<rocketBox.right && rockBox.right>rocketBox.left){
+        const rockBox=getHitbox(r,8,8),
+              rocketBox=getHitbox(rocket,14,12);
+
+        if(rockBox.bottom>rocketBox.top && rockBox.top<rocketBox.bottom &&
+           rockBox.left<rocketBox.right && rockBox.right>rocketBox.left){
             r.remove(); clearInterval(fall); endGame();
         }
+
         if(parseInt(r.style.top)>innerHeight){ r.remove(); clearInterval(fall); }
     },20);
 
@@ -298,7 +365,8 @@ function spawnRock(){
 async function endGame(){
     gameOver=true;
     clearInterval(scoreInterval);
-    rockIntervals.forEach(int=>clearInterval(int)); rockIntervals=[];
+    rockIntervals.forEach(int=>clearInterval(int));
+    rockIntervals=[];
     finalScore.textContent="Score : "+score;
     await sendScore(pseudoInput.value||"Anonyme",score);
     let best=localStorage.getItem("bestScore")||0;
@@ -311,6 +379,7 @@ async function endGame(){
 async function displayLeaderboard(collection){
     list.innerHTML="";
     const data=await fetchLeaderboard(collection);
+
     for(let i=0;i<10;i++){
         let d=document.createElement("div");
         if(data[i]){
@@ -329,10 +398,14 @@ async function displayLeaderboard(collection){
 
 /* BUTTONS */
 function showLeaderboard(){ showSeasonLeaderboard(); }
-function showSeasonLeaderboard(){ currentLeaderboard="season1"; displayLeaderboard("leaderboard_season1"); }
-function showAlltimeLeaderboard(){ currentLeaderboard="alltime"; displayLeaderboard("leaderboard"); }
-
+function showSeasonLeaderboard(){ 
+    currentLeaderboard = "leaderboard_season2";
+    displayLeaderboard(currentLeaderboard);
+}
+function showAlltimeLeaderboard(){ 
+    currentLeaderboard = "leaderboard";
+    displayLeaderboard(currentLeaderboard);
+}
 </script>
 </body>
 </html>
-
