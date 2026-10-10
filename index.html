@@ -188,17 +188,19 @@ let currentLeaderboard = "leaderboard_season2";
 /* SCORE / LEADERBOARD */
 async function sendScore(name, score){
     try{
-        await db.collection("leaderboard").add({
-            name, score,
+        const data = {
+            name,
+            score,
             date: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        await db.collection(currentLeaderboard).add({
-            name, score,
-            date: firebase.firestore.FieldValue.serverTimestamp()
-        });
-    }catch(err){ console.error(err); }
-}
+        };
 
+        await db.collection("leaderboard").add(data);
+        await db.collection("leaderboard_season3").add(data);
+
+    }catch(err){
+        console.error("Erreur d'enregistrement du score :", err);
+    }
+}
 async function fetchLeaderboard(collection){
     try{
         const snapshot = await db.collection(collection)
