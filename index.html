@@ -624,12 +624,31 @@ function spawnRock() {
     let r = document.createElement("img");
     let type = rockImages[Math.floor(Math.random() * rockImages.length)];
 
-    r.src = type.src;
+
     r.className = "rock";
     r.style.width = type.width + "px";
     r.style.height = type.height + "px";
     r.style.left = Math.random() * Math.max(0, innerWidth - type.width) + "px";
     r.style.top = "-60px";
+    r.style.visibility = "hidden";
+
+    r.onload = () => {
+        if (gameOver) {
+            r.remove();
+            return;
+        }
+
+        r.style.visibility = "visible";
+    };
+
+    r.onerror = () => {
+        console.error("Impossible de charger l'image du rocher :", type.src);
+        r.remove();
+    };
+
+    r.src = type.src;
+    game.appendChild(r);
+
 
     game.appendChild(r);
 
