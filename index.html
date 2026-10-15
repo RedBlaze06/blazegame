@@ -192,11 +192,13 @@ button {
     pointer-events: none;
 }
 
-#score {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    font-size: 22px;
+
+#score.score-special {
+    top: 58px;
+    background: white;
+    color: black;
+    padding: 6px 10px;
+    border-radius: 8px;
 }
 
 /* GAME OVER */
@@ -435,6 +437,10 @@ function afficherBienvenue(pseudo) {
     if (welcomeBanner.textContent !== "") {
         welcomeBanner.style.display = "flex";
     }
+    scoreTxt.classList.toggle(
+    "score-special",
+    welcomeBanner.textContent !== ""
+);
 }
 
 /* ETOILES */
